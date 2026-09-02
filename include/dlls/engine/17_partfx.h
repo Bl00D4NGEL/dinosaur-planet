@@ -62,6 +62,7 @@ enum ParticleID {
     PARTICLE_19E = 0x19E,
     PARTICLE_19F = 0x19F,
     PARTICLE_1A0 = 0x1A0,
+    PARTICLE_1A3 = 0x1A3,
     PARTICLE_1A5 = 0x1A5,
     PARTICLE_1A9 = 0x1A9,
     PARTICLE_1AA = 0x1AA,
@@ -95,6 +96,7 @@ enum ParticleID {
     PARTICLE_27A = 0x27A, //glowing pink magic flares (DBSH_Symbol)
     PARTICLE_286 = 0x286,
     PARTICLE_28A = 0x28A,
+    PARTICLE_28B = 0x28B,
     PARTICLE_2BB = 0x2BB,
     /* --- DLL 35 END --- */
     PARTICLE_320 = 0x320, // big expanding cloud of mist         (WaterWallSpray)
@@ -210,6 +212,9 @@ enum ParticleID {
     PARTICLE_52A = 0x52A,
     PARTICLE_53C = 0x53C,
     PARTICLE_53D = 0x53D,
+    PARTICLE_545 = 0x545,
+    PARTICLE_546 = 0x546,
+    PARTICLE_547 = 0x547,
     PARTICLE_549 = 0x549,
     PARTICLE_54A = 0x54A,
     PARTICLE_54B = 0x54B,
@@ -254,6 +259,7 @@ enum ParticleID {
     PARTICLE_713 = 0x713,
     PARTICLE_717 = 0x717,
     PARTICLE_718 = 0x718,
+    PARTICLE_724 = 0x724,
     PARTICLE_739 = 0x739,
     /* --- DLL 51 END --- */
     /* --- DLL 50 START --- */
@@ -261,6 +267,8 @@ enum ParticleID {
     PARTICLE_73B = 0x73B,
     PARTICLE_73D = 0x73D,
     PARTICLE_73E = 0x73E,
+    PARTICLE_73F = 0x73F,
+    PARTICLE_740 = 0x740,
     PARTICLE_741 = 0x741,
     PARTICLE_76B = 0x76B,
     /* --- DLL 50 END --- */

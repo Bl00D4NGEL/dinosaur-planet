@@ -2,52 +2,95 @@
 #include "sys/gfx/model.h"
 #include "sys/objtype.h"
 
-typedef struct {
-    Object* unk0;
-    struct DLL420_Func18FCUnk* unk4;
-    struct DLL420_Func18FCUnk* unk8;
-    u8 _unkC[0x14 - 0xC];
-    f32 unk14; 
-    s16 unk18; 
-    f32 unk1C;
-    f32 unk20;
-    u8 unk24;
-    s32 unk28[3];
-} DLL420_Func18FCUnk;
-
-typedef struct {
-    Vec3f unk0;
-    u8 _unkC[0x14 - 0xC];
-    f32 unk14; 
-    s16 unk18; 
-    f32 unk1C;
-    f32 unk20;
-    u8 unk24;
-    s32 unk28[3];
-} DLL420_FuncF04Unk;
+//TODO: move to header
+DLL_INTERFACE(DLL_420_DFRopeNode) {
+    /*:*/ DLL_INTERFACE_BASE(DLL_IObject);
+    /*07*/ void (*func7)(Object* self, f32* arg1); //arg1 might be Vec4f*
+    /*08*/ void (*func8)(Object* self, f32 arg1, f32* ox, f32* oy, f32* oz);
+    /*09*/ void (*func9)(Object* self, f32* arg1, f32 arg2);
+    /*10*/ s16 (*func10)(Object* self, f32 arg1, f32 arg2);
+    /*11*/ UnknownDLLFunc func11;
+    /*12*/ s16 (*func12)(Object* self);
+    /*13*/ void (*func13)(Object* self, u32 arg1); //Set connection state?
+    /*14*/ s16 (*func14)(Object* self); //Check if disconnected?
+    /*15*/ void (*func15)(Object* self, f32 arg1);
+    /*16*/ void (*func16)(Object* self); //clear pointer to other DFropenode object
+};
 
 typedef struct {
     ObjSetup base;
     u8 unk18;
 } DLL420_Setup;
 
+typedef struct DLL420_Grandchild_TypeA {
+    Vec3f unk0; //Position adjustment for the rope node
+    Vec3f unkC; //Velocity for the rope node?
+    Vec3f unk18;
+    u8 unk24; //count of valid pointers in unk28 (number of connections?)
+    u8 unk25;
+    u8 unk26;
+    u8 unk27;
+    struct DLL420_Grandchild_TypeB* unk28[2]; //typeB for this node
+    u8 unk30;
+} DLL420_Grandchild_TypeA; //0x34 (confirmed from dll_420_func_152C)
+
+typedef struct DLL420_Grandchild_TypeB { 
+    f32 unk0; //distance?
+    DLL420_Grandchild_TypeA* unk4; //typeA for this node
+    DLL420_Grandchild_TypeA* unk8; //typeA for next node?
+    f32 unkC;
+    f32 unk10; //unsure
+    f32 unk14; //unsure
+    Vec3f unk18; 
+} DLL420_Grandchild_TypeB; //0x24 (confirmed from dll_420_func_152C)
+
+typedef struct {
+    DLL420_Grandchild_TypeA* unk0; //pointer to unk44 in this struct (start of typeA data)
+    DLL420_Grandchild_TypeB* unk4; //pointer to unk1E4 in this struct (start of typeB data)
+    u8 unk8; //subdivision count?
+    s8 unk9; //subdivision count plus 1?
+    s8 unkA;
+    u8 unkB;
+    Vec3f unkC; 
+    f32 unk18; 
+    f32 unk1C; 
+    f32 unk20; 
+    f32 unk24; //distance
+    s32 unk28; 
+    f32 unk2C; 
+    f32 unk30; 
+    s8 unk34;
+    s8 unk35;
+    s8 unk36;
+    s8 unk37;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    DLL420_Grandchild_TypeA unk44[8]; //count could vary, but in practice seems to always be 8
+    DLL420_Grandchild_TypeB unk1E4[8]; //maybe 7? could be data for spans, and typeA is for points?
+} DLL420_Child;  //Length: (count * 0x58) + 0x20     [(8 * (0x34 + 0x24)) + (0x44 - 0x24) = 0x2E0]
+
 typedef struct DLL420_Data {
-    Object* unk0;
-    u8 _unk4[0x14 - 0x4];
+    Object* unk0; //Other paired DFropenode object
+    Vec3f unk4;
+    s32 unk10;
     f32 unk14; 
     s16 unk18; 
     f32 unk1C[4];
-    DLL420_FuncF04Unk** unk2C;
+    DLL420_Child* unk2C; //allocated by dll_420_func_152C, size `(count * 0x58) + 0x20` (count always seems to be 8)
     u32 unk30 : 1;
-} DLL420_Data;
+} DLL420_Data; //0x34
 
-/*0x0*/ static Texture* data_0 = NULL;
+/*0x0*/ static Texture* data_0 = NULL; //Rope texture
 /*0x4*/ static u8 data_4 = 0;
 /*0x4*/ static u32 data_8[] = {
     0x00000000, 0x00000000
 };
 
-static void dll_420_func_18BC(DLL420_FuncF04Unk** nodeData);
+static void dll_420_func_18BC(DLL420_Child* rope);
+static void dll_420_func_1A8C(DLL420_Child* rope);
+static void dll_420_func_1C48(DLL420_Child* rope);
+static void dll_420_func_1EF0(DLL420_Child* rope);
 
 // offset: 0x0 | ctor
 void dll_420_ctor(void* dll) { }
@@ -91,7 +134,7 @@ void dll_420_free(Object* self, s32 onlySelf) {
     s32 i;
     s32 count; //38
     Object** objects;
-    Object* otherNode;
+    Object* otherObj;
 
     objSetup = (DLL420_Setup*)self->setup;
     objData = self->data;
@@ -106,15 +149,15 @@ void dll_420_free(Object* self, s32 onlySelf) {
         dll_420_func_18BC(objData->unk2C);
     }
     
-    otherNode = objData->unk0;
-    if (otherNode == NULL) {
+    otherObj = objData->unk0;
+    if (otherObj == NULL) {
         return;
     }
     
-    objects = objGetAllOfType(0x19, &count);
+    objects = objGetAllOfType(OBJTYPE_RopeNode, &count);
     for (i = 0; i < count; i++) {
-        if (otherNode == objects[i]) {
-            ((DLL_Unknown*)otherNode->dll)->vtbl->func[16].withOneArg(otherNode);
+        if (otherObj == objects[i]) {
+            ((DLL_420_DFRopeNode*)otherObj->dll)->vtbl->func16(otherObj);
         }
     }
 }
@@ -145,65 +188,99 @@ void dll_420_func_DFC(Object* self, f32* arg1) {
 // offset: 0xE28 | func: 9 | export: 8
 void dll_420_func_E28(Object* self, f32 arg1, f32* ox, f32* oy, f32* oz) {
     DLL420_Data* objData;
-    s8 index;
+    s8 idx;
     Vec3f d;
 
     objData = self->data;
     
-    index = (s8) arg1;
-    arg1 -= index;
+    idx = (s8) arg1;
+    arg1 -= idx;
     
-    d.x = (objData->unk2C[0] + index + 1)->unk0.f[0] - (objData->unk2C[0] + index)->unk0.f[0];
-    d.y = (objData->unk2C[0] + index + 1)->unk0.f[1] - (objData->unk2C[0] + index)->unk0.f[1];
-    d.z = (objData->unk2C[0] + index + 1)->unk0.f[2] - (objData->unk2C[0] + index)->unk0.f[2];
+    d.x = objData->unk2C->unk0[idx + 1].unk0.f[0] - objData->unk2C->unk0[idx].unk0.f[0];
+    d.y = objData->unk2C->unk0[idx + 1].unk0.f[1] - objData->unk2C->unk0[idx].unk0.f[1];
+    d.z = objData->unk2C->unk0[idx + 1].unk0.f[2] - objData->unk2C->unk0[idx].unk0.f[2];
     
-    *ox = (objData->unk2C[0] + index)->unk0.x + self->srt.transl.x + d.x * arg1;
-    *oy = (objData->unk2C[0] + index)->unk0.y + self->srt.transl.y + d.y * arg1;
-    *oz = (objData->unk2C[0] + index)->unk0.z + self->srt.transl.z + d.z * arg1;
+    *ox = objData->unk2C->unk0[idx].unk0.x + self->srt.transl.x + d.x * arg1;
+    *oy = objData->unk2C->unk0[idx].unk0.y + self->srt.transl.y + d.y * arg1;
+    *oz = objData->unk2C->unk0[idx].unk0.z + self->srt.transl.z + d.z * arg1;
 }
 
 // offset: 0xF04 | func: 10 | export: 9
 void dll_420_func_F04(Object* self, f32* arg1, f32 arg2) {
     DLL420_Data* objData = self->data;
-    DLL420_FuncF04Unk* temp_v0;
-    s8 index;
+    DLL420_Grandchild_TypeA* node;
+    s8 idx;
     
-    index = (s8)*arg1;
+    idx = (s8)*arg1;
     
-    *arg1 -= index;
+    *arg1 -= idx;
     
-    temp_v0 = objData->unk2C[0] + index;
+    node = &objData->unk2C->unk0[idx];
 
-    arg2 /= sqrtf(SQ(temp_v0[0].unk0.z - temp_v0[1].unk0.z) + SQ(temp_v0[0].unk0.x - temp_v0[1].unk0.x));
+    arg2 /= sqrtf(SQ(node[0].unk0.f[2] - node[1].unk0.f[2]) + SQ(node[0].unk0.f[0] - node[1].unk0.f[0]));
     *arg1 += arg2;
-    *arg1 +=  index;
+    *arg1 +=  idx;
 }
 
 // offset: 0xFDC | func: 11 | export: 10
 void dll_420_func_FDC(Object* self, f32 arg1, f32 arg2) {
-    DLL420_Data* objData;
     s8 idx;
+    DLL420_Data* objData;
+    DLL420_Child* rope;
+    DLL420_Grandchild_TypeA* node;
 
     objData = self->data;
+
     
     arg1 -= (s8)arg1;
     idx = arg1;
     arg1 -= idx;
     
-    objData->unk2C[0][idx].unk1C += arg2 * arg1;
-    objData->unk2C[0][idx].unk1C += arg2 * (1.0f - arg1);
+    objData->unk2C->unk0[idx].unk18.f[1] += arg2 * arg1;
+    objData->unk2C->unk0[idx].unk18.f[1] += arg2 * (1.0f - arg1);
 }
 
 // offset: 0x1098 | func: 12 | export: 11
 #pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/420_DFropenode/dll_420_func_1098.s")
 
 // offset: 0x135C | func: 13
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/420_DFropenode/dll_420_func_135C.s")
+f32 dll_420_func_135C(f32* arg0, f32* arg1, f32* arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 var_fv1;
+    
+    dx = arg6 - arg3;
+    dy = arg7 - arg4;
+    dz = arg8 - arg5;
+    
+    if ((arg6 == arg3) && (dz == 0.0f)) {
+        var_fv1 = 0.0f;
+    } else {
+        var_fv1 = ((((*arg0) - arg3) * dx) + (((*arg2) - arg5) * dz)) / (SQ(dx) + SQ(dz));
+    }
+    
+    if (var_fv1 < 0.0f) {
+        *arg0 = arg3;
+        *arg1 = arg4;
+        *arg2 = arg5;
+    } else if (var_fv1 >= 1.0f) {
+        *arg0 = arg6;
+        *arg1 = arg7;
+        *arg2 = arg8;
+    } else {
+        *arg0 = (var_fv1 * dx) + arg3;
+        *arg1 = (var_fv1 * dy) + arg4;
+        *arg2 = (var_fv1 * dz) + arg5;
+    }
+    
+    return var_fv1;
+}
 
 // offset: 0x148C | func: 14 | export: 16
 void dll_420_func_148C(Object* self) {
     DLL420_Data* objData = self->data;
-    objData->unk0 = 0;
+    objData->unk0 = NULL;
 }
 
 // offset: 0x149C | func: 15 | export: 12
@@ -218,6 +295,7 @@ void dll_420_func_14AC(Object* self, u32 arg1) {
 
     arg1 = !arg1;
     objData->unk30 = arg1;
+
     if (objData->unk0 != NULL) {
         objData = objData->unk0->data;
         objData->unk30 = arg1;
@@ -241,47 +319,168 @@ void dll_420_func_1514(Object* self, f32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/420_DFropenode/dll_420_func_152C.s")
 
 // offset: 0x18BC | func: 20
-void dll_420_func_18BC(DLL420_FuncF04Unk** nodeData) {
-    if (nodeData != NULL) {
-        mmFree(nodeData);
+void dll_420_func_18BC(DLL420_Child* rope) {
+    if (rope != NULL) {
+        mmFree(rope);
     }
 }
 
 // offset: 0x18FC | func: 21
-void dll_420_func_18FC(DLL420_Func18FCUnk* arg0, DLL420_Func18FCUnk* arg1, DLL420_Func18FCUnk* arg2) {
-    s32 idx1;
-    s32 idx2;
-
-    idx1 = 0;
-    idx2 = 0;
+void dll_420_func_18FC(DLL420_Grandchild_TypeB* typeB, DLL420_Grandchild_TypeA* typeA1, DLL420_Grandchild_TypeA* typeA2) {
+    s32 idx1 = 0;
+    s32 idx2 = 0;
     
-    while(arg1->unk28[idx1]) {
+    while (typeA1->unk28[idx1]) {
         idx1++;
     }
     
-    while(arg2->unk28[idx2]) {
+    while (typeA2->unk28[idx2]) {
         idx2++;
     }
     
-    if ((arg1->unk24 >= idx1) && (arg2->unk24 >= idx2)) {
-        arg1->unk28[idx1] = arg0;
-        arg2->unk28[idx2] = arg0;
-        arg0->unk4 = arg1;
-        arg0->unk8 = arg2;
+    if ((idx1 <= typeA1->unk24) && (idx2 <= typeA2->unk24)) {
+        typeA1->unk28[idx1] = typeB;
+        typeA2->unk28[idx2] = typeB;
+        typeB->unk4 = typeA1;
+        typeB->unk8 = typeA2;
     }
 }
 
 // offset: 0x1994 | func: 22
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/420_DFropenode/dll_420_func_1994.s")
+void dll_420_func_1994(DLL420_Child* rope) {
+    DLL420_Grandchild_TypeA* node;
+    s32 i;
+    s32 j;
+
+    node = rope->unk0;
+    dll_420_func_1EF0(rope);
+    
+    for (i = 0; i < rope->unk28; i++) {
+        dll_420_func_1A8C(rope);
+        dll_420_func_1C48(rope);
+    }
+    
+    for (i = 0; i < rope->unk8; i++) {
+        j = 0;
+        while (j < 3) {
+            node->unk18.f[j++] = 0.0f;
+        }
+        node++;
+    }
+}
 
 // offset: 0x1A8C | func: 23
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/420_DFropenode/dll_420_func_1A8C.s")
+void dll_420_func_1A8C(DLL420_Child* rope) {
+    DLL420_Grandchild_TypeB* node;
+    Vec3f delta;
+    Vec3f deltaV;
+    f32 factor;
+    s32 i;
+
+    node = rope->unk4;
+    
+    for (i = 0; i < (rope->unk8 - 1); i++, node++) {
+        delta.f[0] = node->unk4->unk0.f[0] - node->unk8->unk0.f[0];
+        delta.f[1] = node->unk4->unk0.f[1] - node->unk8->unk0.f[1];
+        delta.f[2] = node->unk4->unk0.f[2] - node->unk8->unk0.f[2];
+        
+        deltaV.f[0] = node->unk4->unkC.f[0] - node->unk8->unkC.f[0];
+        deltaV.f[1] = node->unk4->unkC.f[1] - node->unk8->unkC.f[1];
+        deltaV.f[2] = node->unk4->unkC.f[2] - node->unk8->unkC.f[2];
+        
+        node->unk0 = sqrtf(SQ(delta.f[0]) + SQ(delta.f[1]) + SQ(delta.f[2]));
+        if (node->unk0 > node->unk14) {
+            node->unkC = 0.0f;
+        }
+        
+        if (node->unkC == 0.0f) {
+            node->unk18.f[0] = node->unk18.f[1] = node->unk18.f[2] = 0.0f;
+        } else {
+            factor = -node->unk10 * (node->unk0 - node->unkC);
+            node->unk18.f[0] = delta.f[0] * factor;
+            node->unk18.f[1] = delta.f[1] * factor;
+            node->unk18.f[2] = delta.f[2] * factor;
+        }
+    }
+}
 
 // offset: 0x1C48 | func: 24
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/420_DFropenode/dll_420_func_1C48.s")
+void dll_420_func_1C48(DLL420_Child* rope) {
+    DLL420_Grandchild_TypeA* node;
+    f32 sp68[3];
+    DLL420_Grandchild_TypeB* temp_a0;
+    f32 distance;
+    f32 scaleFactor;
+    s32 i;
+    s32 j;
+    s32 k;
+
+    node = rope->unk0;
+    for (i = 0; i < rope->unk8; i++, node++) {
+        for (j = 0; j < 3; j++) {
+            sp68[j] = 0.0f;
+        }
+
+        if (node->unk30 != 0) {
+            continue;
+        }
+
+        for (k = 0; k < node->unk24; k++) {
+            for (j = 0; j < 3; j++) {
+                temp_a0 = node->unk28[k];
+                if (node == temp_a0->unk4) {
+                    sp68[j] += temp_a0->unk18.f[j];
+                } else {
+                    sp68[j] -= temp_a0->unk18.f[j];
+                }
+            }
+        }
+
+        distance = sqrtf(SQ(sp68[0]) + SQ(sp68[1]) + SQ(sp68[2]));
+        if (rope->unk2C < distance) {
+            scaleFactor = rope->unk2C / distance;
+            sp68[0] *= scaleFactor;
+            sp68[1] *= scaleFactor;
+            sp68[2] *= scaleFactor;
+        }
+
+        for (j = 0; j < 3; j++) {
+            node->unkC.f[j] += (sp68[j] * rope->unk40) + node->unk18.f[j];
+            node->unkC.f[j] -= (node->unkC.f[j] * rope->unk38);
+        }
+
+        node->unkC.f[1] += rope->unk30 * rope->unk3C;
+        for (j = 0; j < 3; j++) {
+            node->unk0.f[j] += (node->unkC.f[j] * rope->unk30);
+        }
+    }
+}
 
 // offset: 0x1EF0 | func: 25
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/420_DFropenode/dll_420_func_1EF0.s")
+void dll_420_func_1EF0(DLL420_Child* rope) {
+    DLL420_Grandchild_TypeA* nodes;
+    s32 i;
+    
+    nodes = rope->unk0;
+
+    if (rope->unk34 < -50) {
+        rope->unk35 = 1;
+    }
+
+    if (rope->unk34 > 50) {
+        rope->unk35 = 2;
+    }
+
+    if (rope->unk35 == 2) {
+        rope->unk34--;
+    } else {
+        rope->unk34++;
+    }
+
+    for (i = 1; i < (rope->unk8 - 1); i++) {
+        nodes[i].unk18.f[0] += 0.01f * rope->unk34;
+    }
+}
 
 /*0x0*/ static const u32 rodata_0[] = {
     0x00000103, 0x00000000, 0x00000000, 0x00000000, 0x00010403, 0x00000000, 0x00000000, 0x00000000, 

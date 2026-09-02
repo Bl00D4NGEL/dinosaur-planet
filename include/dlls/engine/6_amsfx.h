@@ -172,19 +172,6 @@ enum SoundID {
     SOUND_C4_CloudRunner_Chirp_Descending = 0xC4,  
     SOUND_C5_CloudRunner_Chirp_Warble = 0xC5,  
 
-    SOUND_C8_CC_HighTop_Do_Not_Swim = 0xC8, //"Do not swim in these waters! The currents are strong, they will drag you straight under."
-    SOUND_C9_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_1 = 0xC9, //"WE ARE QUAN ATA LACHU, SIX STARS OF EIGHT. BY YOUR WILL YOU HAVE ALMOST [...]"
-    SOUND_CA_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_2 = 0xCA, //"Do you mean General Scales?" (Sabre) 
-    SOUND_CB_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_3 = 0xCB, //"NOT SCALES. EVIL."
-    SOUND_CC_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_4 = 0xCC, //"WHEN WE ARE ONE, THE MAJESTIC 8 SHALL BE ALIGNED. WHEN THIS IS COMPLETE, EVIL SHALL BE BANISHED FOREVER."
-    SOUND_CD_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_5 = 0xCD, //"Majestic 8? Eight planets in alignment?" (Sabre)
-    SOUND_CE_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_6 = 0xCE, //"DINOSAUR PLANET AND YOUR OWN WORLD, ARE BUT TWO OF THE MAJESTIC 8. [...]"
-    SOUND_CF_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_7 = 0xCF, //"You mean they actually exist??" (Sabre)
-    SOUND_D0_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_8 = 0xD0, //"THE KRAZOA FOUGHT A GREAT WAR AGAINST EVIL. MANY AEONS IN THE PAST. [...]"
-    SOUND_D1_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_9 = 0xD1, //"IF EVIL SUCCEEDS IN EXTRACTING THIS PLANET'S SOURCE OF MAGIC ENERGY, THEN EVIL HAS WON. WE CANNOT STOP THE DARKNESS."
-    SOUND_D2_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_10 = 0xD2, //"GO TO THE KRAZOA. GO TO THE KRAZOA. GO TO THE KRAZOA. [...]"
-    SOUND_D3_WM_Quan_Ata_Lachu_6th_Spirit_Deposited_11 = 0xD3, //"So that's why Krystal saw the mirage... the Krazoa need us to help them. Krystal must go there immediately!" (Sabre)
-
     SOUND_D6_Krystal_Hup = 0xD6,           //player attack sfx
     SOUND_D7_Krystal_Hut = 0xD7,           //player attack sfx
     SOUND_D8_Krystal_Huh = 0xD8,           //player attack sfx
@@ -244,6 +231,8 @@ enum SoundID {
     SOUND_130 = 0x130,
     SOUND_131 = 0x131, // RobotPatrol "yipee :)"
 
+    SOUND_135_Laser_Hum = 0x135,
+
     SOUND_140_Galleon_Propeller_Loop = 0x140,
 
     SOUND_142_Krystal_Play = 0x142,          //"Go play!"
@@ -266,7 +255,7 @@ enum SoundID {
     SOUND_156_Tricky_Wait_Theres_Something_Close_By = 0x156, //(Heard along the path to the SnowHorn geyser area in the One Hour Footage)
     SOUND_157_Bird_Call_Warbling = 0x157, //NWsfx
     SOUND_158_Bird_Call_Whistle_Descending = 0x158, //NWsfx
-    SOUND_159_DFPT_Kyte_SpellStone_Holder = 0x159, //"Krystal! It's the SpellStone Holder!"
+
     SOUND_15A_Bird_Call_Whistle_Ascending = 0x15A, //NWsfx
     SOUND_15B_Bird_Call_Squawk = 0x15B, //NWsfx
 
@@ -305,7 +294,7 @@ enum SoundID {
     SOUND_1D1 = 0x1D1, //Silent
 
     SOUND_1D2_Roar = 0x1D2, // Deleted genprops object
-    SOUND_1D3 = 0x1D3,
+    SOUND_1D3_Fire_Crackling_Loop = 0x1D3,
     SOUND_1D4_Metal_Ratcheting_Loop = 0x1D4,
     SOUND_1D5_Metal_Squeak = 0x1D5,
 
@@ -321,6 +310,8 @@ enum SoundID {
     SOUND_222_NW_Tricky_Sharpclaw_Help = 0x222,
 
     SOUND_226_Fall_Impact = 0x226,
+
+    SOUND_228_Laser_Zap = 0x228,
 
     SOUND_236_SharpClaw_Argh = 0x236, //DR_NiceSharpy
     SOUND_237_SharpClaw_Arghhh = 0x237,
@@ -375,6 +366,8 @@ enum SoundID {
     SOUND_292_Impact = 0x292, // used by IMSnowBike
 
     SOUND_2B8_Spell_Fired = 0x2B8, //used by Projectile Spell and Grenade Spell (and by Ice Beam?)
+    
+    SOUND_2BB_Laser_Stop_Hiss = 0x2BB,
 
     SOUND_2F8_Door_Opening = 0x2f8, // used by doors in Krazoa Shrines
     SOUND_2F9_Door_Closing = 0x2f9, // used by doors in Krazoa Shrines
@@ -446,6 +439,8 @@ enum SoundID {
     SOUND_388_Wood_Smash = 0x388, //DIMWoodDoor
     SOUND_389_Explosion = 0x389, //DIMExplosion
 
+    SOUND_3C4_Conveyor_Loop = 0x3C4, //DIM2Conveyor
+
     SOUND_3D6 = 0x3D6, // used in SHroot (DLL 510)
     SOUND_3D7_Whoosh = 0x3D7, //used in SHroot (DLL 510), DIM2Icicle (DLL 562) 
     SOUND_3D8_Water_Splash = 0x3D8, // used in pushpull (DLL 274), SHroot (DLL 510), DIM2Icicle (DLL 562)
@@ -461,6 +456,10 @@ enum SoundID {
 
     SOUND_406_Footstep_Ice = 0x406, //Creaky ice [FOOTSTEP FOLEY]
     SOUND_407_Footstep_Ice = 0x407, //Creaky ice [FOOTSTEP FOLEY]
+
+    SOUND_411_SharpClaw_Laughing = 0x411, //"Ehhh-hehehehehhh!"
+
+    SOUND_424_Flame_Lighting = 0x424,
 
     SOUND_43C_Target_Highlighted = 0x43C, // camera DLL [Interaction Arrow]
     SOUND_43D_Transporter_Fire = 0x43D,
@@ -480,6 +479,9 @@ enum SoundID {
     
     SOUND_4BB = 0x4BB,
     SOUND_4BC_Tricky_Dig_EMPTY = 0x4BC, //NWtricky (empty)
+    
+    SOUND_4D0_SharpClaw_Grunt = 0x4D0, //"Hhhah!"
+    SOUND_4D1_SharpClaw_Growl = 0x4D1, //"Grrr..."
 
     SOUND_506_Chomping_Food = 0x506, //collectable
 
@@ -489,6 +491,9 @@ enum SoundID {
 
     SOUND_50C_Low_Rumble_Loop = 0x50C, //IMSnowBike
     SOUND_50D_Jet_Loop = 0x50D,        //IMSnowBike
+    SOUND_50E = 0x50E,                 //IMIcicle
+    SOUND_50F = 0x50F,                 //IMIcicle
+    SOUND_510_Ice_Shatter = 0x510,                 //IMIcicle
 
     SOUND_53A_Spore_Spray_Intro = 0x53A, //used by SHkillermushroom
     SOUND_53B_Spore_Spray_Loop = 0x53B, //used by SHkillermushroom
@@ -501,6 +506,8 @@ enum SoundID {
     SOUND_57C = 0x57C, //tesla.c
     SOUND_57D = 0x57D, //tesla.c
     SOUND_57E = 0x57E, //tesla.c
+
+    SOUND_5BC_SharpClaw_Laughing = 0x5BC, //"Rahhh-hehehehehhh!"
 
     SOUND_PICMENU_SELECT = 0x5D3,
     SOUND_PICMENU_BACK = 0x5D4, // Used in DLL 66
@@ -545,6 +552,8 @@ enum SoundID {
     SOUND_64D_Wooden_Rattle = 0x64D, // used by MediumCrate, SmallBasket
 
     SOUND_669_Insect_Scurry_Loop = 0x669, // Scarab
+    
+    SOUND_66B = 0x66B,
 
     SOUND_66E_Ting = 0x66E, // MagicDust
 
@@ -647,6 +656,8 @@ enum SoundID {
 
     SOUND_77C_Capy_Sniff = 0x77C,
     SOUND_77D_Capy_Eat = 0x77D,
+
+    SOUND_780_Hatch_Opening = 0x780,
 
     SOUND_782 = 0x782, //DFpulley
     SOUND_783_Rope_Strain = 0x783, //DFcradle
@@ -772,6 +783,18 @@ enum SoundID {
 
     SOUND_9C5_Vanish = 0x9C5,               //WCpushblock
     SOUND_9C6_Appear = 0x9C6,               //WCpushblock
+    
+    SOUND_9CD = 0x9CD,
+
+    SOUND_9D2_Fire_Roaring_Loop = 0x9D2,
+
+    SOUND_9F5_Steam_Hiss = 0x9F5,
+
+    SOUND_9F9_Laser_Startup_Hiss = 0x9F9,
+    SOUND_9FA_Laser_Whir_Loop = 0x9FA,
+    SOUND_9FB_Illusory_Wall_Revealed = 0x9FB,
+
+    SOUND_A11_Stone_Crumbling = 0xA11,
 
     SOUND_A20_Electric_Surge_Quieter = 0xA20,       //DBdustgeezer
     SOUND_A21_Whoosh_Echoey = 0xA21,                //DBdustgeezer
@@ -805,6 +828,9 @@ enum SoundID {
 
     SOUND_AB4_Magic_Barrier_Deflect = 0xAB4, //Lunaimar
 
+    SOUND_AC5_Steam_Venting_Hiss_Low = 0xAC5, 
+    SOUND_AC6_Steam_Venting_Hiss_High = 0xAC6, 
+    
     SOUND_AC8_Ground_Impact = 0xAC8, // used by PointBack
     SOUND_AC9_Impact_Crumbling = 0xAC9, // used by PointBack
 
