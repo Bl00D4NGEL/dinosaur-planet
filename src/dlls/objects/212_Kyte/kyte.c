@@ -74,10 +74,12 @@ typedef struct {
     s16 unk110; // route goal
     s16 unk112;
     CurveSetup* unk114;
-    u8 pad118[0x190 - 0x118];
+    Kyte_Unk3 unk118;
+    u8 pad146[0x190 - 0x148];
     u8 unk190;
     u8 unk191;
-    u8 pad192[0x1C8 - 0x192];
+    u8 pad192[0x1C4 - 0x192];
+    s32 unk1C4;
     s32 unk1C8;
     u32 pad1CC;
     s32 unk1D0;
@@ -105,7 +107,8 @@ typedef struct {
     u8 pad225[0x228 - 0x225];
     CurveSetup *unk228;
     s8 unk22C;
-    u8 pad22D[0x230 - 0x22D];
+    u8 unk22D;
+    u8 pad22E[0x230 - 0x22E];
     CurveSetup* unk230;
     CurveSetup* unk234;
     s32 unk238;
@@ -151,7 +154,6 @@ typedef void (*Bss0_Callback)(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* ar
 /*0x15C*/ static u32 data_15C[] = {
     0x00000000, 0x00000000, 0x3f800000
 };
-/*0x168*/ static u32 data_168 = 0xffffffff;
 
 /*0x0*/ static Bss0_Callback bss_0[4];
 
@@ -168,6 +170,13 @@ static CurveSetup *Kyte_func_1D2C(DLL212_Data *objData, CurveSetup *setup, s32 a
 static CurveSetup* Kyte_func_1134(Object* self, u8 arg1, u8 arg2);
 static CurveSetup* Kyte_func_1404(DLL212_Data* arg0, CurveSetup* arg1, s32* arg2, s32 arg3);
 static void Kyte_func_200C(Object* self, Kyte_Unk3* arg1, Kyte_Unk2* arg2, s32 arg3);
+static int Kyte_func_40BC(u8 arg0);
+static f32 Kyte_func_20A4(Object* self, Kyte_Unk3* arg1, Kyte_Unk4* arg2, s32 arg3, s32 arg4);
+static void Kyte_func_A94(Object* self,  Object *override, AnimObj_Data* arg2);
+static void Kyte_func_300C(Object* self);
+
+// exported func, requires proto
+void Kyte_func_B94(Object* self, s32 commandIndex);
 
 // offset: 0x0 | ctor
 void Kyte_ctor(void* dll) { }
@@ -205,70 +214,170 @@ u32 Kyte_obj_GetDataSize(Object* self, u32 offsetAddr) {
 }
 
 // offset: 0x8E8 | func: 7
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_8E8.s")
+s32 Kyte_func_8E8(Object* self, u32 arg1, AnimObj_Data* arg2, u32 arg3) {
+    static s32 data_168 = -1;
+    DLL212_Data* objData;
+    SeqJoint* temp_v0;
+    s32 i;
+
+    objData = self->data;
+    ((u8*)objData)[4] = 0;
+    func_800267A4(self);
+    if (arg2->unk62 == 4) {
+        temp_v0 = objExpr_func_80034804(self, 0);
+        arg2->unk120 = temp_v0->yaw;
+        arg2->unk122 = temp_v0->pitch;
+        arg2->unk62 = 0;
+    }
+    if ((self->seqSlot != -1) && (objData->unk1C8 & 0x3000)) {
+        arg2->unkF4 = (AnimObj_DataF4Callback) Kyte_func_A94;
+        arg2->unk7A &= ~4;
+        Kyte_func_20A4(self, &objData->unk118, (u8*)objData + 8, objData->unk118.unk8, (s32) ((u8*)objData)[5]);
+    }
+    for (i = 0; i < arg2->messageCount; i++) {
+        switch (arg2->messages[i]) {
+        case 1:
+            data_168 = 2;
+            break;
+        case 2:
+            data_168 = -1;
+            break;
+        }
+    }
+    if (data_168 != -1) {
+        Kyte_func_B94(self, data_168);
+    }
+    Kyte_func_300C(self);
+    return 0;
+}
 
 // offset: 0xA94 | func: 8
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_A94.s")
+static void Kyte_func_A94(Object* self,  Object *override, AnimObj_Data* arg2) {
+    DLL212_Data* objData = self->data;
+
+    objData->unk118.unk2C = 0;
+    objData->unk190 = 0;
+    objData->unk1C8 = 0;
+}
 
 // offset: 0xAB4 | func: 9 | export: 7
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_AB4.s")
+s32 Kyte_func_AB4(s32 self) {
+    return 0;
+}
 
 // offset: 0xAC4 | func: 10 | export: 8
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_AC4.s")
+void Kyte_func_AC4(Object* self, UNK_TYPE_32 arg1, UNK_TYPE_32 arg2, UNK_TYPE_32 arg3) {
+}
 
 // offset: 0xADC | func: 11 | export: 9
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_ADC.s")
+void Kyte_func_ADC(Object* self, UNK_TYPE_32 arg1) {
+}
 
 // offset: 0xAEC | func: 12 | export: 10
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_AEC.s")
+void Kyte_func_AEC(Object* self, UNK_TYPE_32 arg1, UNK_TYPE_32 arg2, UNK_TYPE_32 arg3) {
+}
 
 // offset: 0xB04 | func: 13 | export: 11
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_B04.s")
+f32 Kyte_func_B04(Object* self) {
+    return 0.0f;
+}
 
 // offset: 0xB24 | func: 14 | export: 12
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_B24.s")
+DLL27_Data* Kyte_func_B24(s32 self) {
+    return NULL;
+}
 
 // offset: 0xB34 | func: 15 | export: 13
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_B34.s")
+s32 Kyte_func_B34(Object* self) {
+    DLL212_Data* objData;
+    u8 temp_v0;
+
+    objData = self->data;
+    if (mainGetBits(BIT_3CB) != 0) {
+        temp_v0 = objData->unk22D;
+        objData->unk22D = 1;
+        return temp_v0;
+    }
+
+    return -1;
+}
 
 // offset: 0xB94 | func: 16 | export: 14
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_B94.s")
+void Kyte_func_B94(Object* self, s32 commandIndex) {
+    DLL212_Data* objData;
+
+    objData = self->data;
+    if (commandIndex < 6) {
+        if (Kyte_func_40BC(commandIndex) != 0) {
+            objData->unk22D |= (1 << commandIndex);
+        }
+    }
+}
+
 
 // offset: 0xC04 | func: 17 | export: 15
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C04.s")
+u8 Kyte_func_C04(Object* self) {
+    DLL212_Data* objData = self->data;
+    return ((u8*)objData->unk0)[0];
+}
 
 // offset: 0xC18 | func: 18 | export: 16
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C18.s")
+u8 Kyte_func_C18(Object* self) {
+    DLL212_Data* objData = self->data;
+    return ((u8*)objData->unk0)[1];
+}
 
 // offset: 0xC2C | func: 19 | export: 17
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C2C.s")
+s32 Kyte_func_C2C(Object* self) {
+    DLL212_Data* objData = self->data;
+    return ((u8*)objData->unk0)[1] + ((u8*)objData->unk0)[0];
+}
 
 // offset: 0xC48 | func: 20 | export: 18
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C48.s")
+void Kyte_func_C48(Object* self, s32 amount) {
+    DLL212_Data* objData = self->data;
+    ((u8*)objData->unk0)[1] = amount;
+}
 
 // offset: 0xC5C | func: 21 | export: 19
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C5C.s")
+s32 Kyte_func_C5C(Object* self) {
+    DLL212_Data* objData = self->data;
+    objData->unk1C4 = -1;
+    return 1;
+}
 
 // offset: 0xC74 | func: 22 | export: 20
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C74.s")
+void Kyte_func_C74(Object* self, UNK_TYPE_32 arg1, UNK_TYPE_32 arg2, UNK_TYPE_32 arg3) {
+}
 
 // offset: 0xC8C | func: 23 | export: 21
+void Kyte_func_C8C(Object* self, s32 arg1, Object* arg2);
 #pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C8C.s")
 
 // offset: 0xC9C | func: 24 | export: 22
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C9C.s")
+void Kyte_func_C9C(Object* self, Object* arg1) {
+}
+
 
 // offset: 0xCAC | func: 25 | export: 24
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_CAC.s")
+u8 Kyte_func_CAC(Object* self) {
+    DLL212_Data* objData = self->data;
+    s32 temp = objData->unk1C8;
+    return (temp & 0x200000) != 0;
+}
 
 // offset: 0xCCC | func: 26 | export: 25
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_CCC.s")
+s32 Kyte_func_CCC(Object* self) {
+    return 0;
+}
+
 
 // offset: 0xCDC | func: 27 | export: 23
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_CDC.s")
+void Kyte_func_CDC(Object* self) {
+}
 
 // offset: 0xCE8 | func: 28
-void Kyte_func_CE8(Object* arg0, DLL212_Data* arg1) {
+void Kyte_func_CE8(Object* self, DLL212_Data* arg1) {
     s32 sp3C;
     s32 sp38;
     CurveSetup* var_s0;
@@ -278,17 +387,17 @@ void Kyte_func_CE8(Object* arg0, DLL212_Data* arg1) {
     if (sp38 != 0) {
         sp3C = mainGetBits(BIT_Kyte_Flight_Curve);
         if (sp3C == 0) {
-            sp3C = gDLL_25->vtbl->func_2A50(arg0, -1)->base_type22.unk4;
+            sp3C = gDLL_25->vtbl->func_2A50(self, -1)->base_type22.unk4;
             mainSetBits(BIT_Kyte_Flight_Curve, sp3C);
         }
         // FAKE
         if (1);
-        var_s0 = gDLL_25->vtbl->func_2A50(arg0, sp3C);
+        var_s0 = gDLL_25->vtbl->func_2A50(self, sp3C);
         if (var_s0 == NULL) {
             return;
         }
     } else {
-        var_s0 = gDLL_25->vtbl->func_2A50(arg0, -1);
+        var_s0 = gDLL_25->vtbl->func_2A50(self, -1);
         if (var_s0 != NULL) {
             sp3C = var_s0->base_type22.unk4;
             mainSetBits(BIT_Kyte_Flight_Curve, sp3C);
@@ -299,16 +408,16 @@ void Kyte_func_CE8(Object* arg0, DLL212_Data* arg1) {
 
     if (var_s0->unk1A < 0x18) {
         if (sp38 != 0) {
-            arg0->srt.transl.x = var_s0->pos.x;
-            arg0->srt.transl.y = var_s0->pos.y;
-            arg0->srt.transl.z = var_s0->pos.z;
+            self->srt.transl.x = var_s0->pos.x;
+            self->srt.transl.y = var_s0->pos.y;
+            self->srt.transl.z = var_s0->pos.z;
         }
         arg1->unk22C = 0;
         ((u8*)arg1)[5] = 0;
         arg1->unk88 = 0;
         sp30 = Kyte_func_1404(arg1, var_s0, (s32* ) &sp3C, 0);
         if (gDLL_25->vtbl->func_1D30((UnkCurvesStruct* ) &arg1->unk4[1], var_s0, sp30, Kyte_func_1404(arg1, sp30, &sp3C, arg1->unk88)) == 0) {
-            Kyte_func_200C(arg0, (Kyte_Unk3* ) arg1->pad118, data_94, 2);
+            Kyte_func_200C(self, &arg1->unk118, data_94, 2);
             arg1->unk190 = 0;
             arg1->unk191 = 0;
             arg1->unk1D0 = -1;
@@ -320,7 +429,7 @@ void Kyte_func_CE8(Object* arg0, DLL212_Data* arg1) {
 }
 
 // offset: 0xF08 | func: 29
-void Kyte_func_F08(DLL212_Data* arg0, Object* arg1) {
+void Kyte_func_F08(DLL212_Data* objData, Object* arg1) {
     CurveSetup* sp54;
     CurveSetup* var_v0;
     s16 sp4E;
@@ -328,28 +437,28 @@ void Kyte_func_F08(DLL212_Data* arg0, Object* arg1) {
     s8 *temp;
     s32 pad[4];
 
-    sp54 = Kyte_func_1134(arg1, arg0->unk88, 1U);
-    var_v0 = Kyte_func_1134(arg1, arg0->unk88, 0U);
+    sp54 = Kyte_func_1134(arg1, objData->unk88, 1U);
+    var_v0 = Kyte_func_1134(arg1, objData->unk88, 0U);
     if (sp54 == NULL || var_v0 == NULL) {
-        sp54 = Kyte_func_1134(arg1, arg0->unk88 ^ 1, 0U);
-        var_v0 = Kyte_func_1134(arg1, arg0->unk88 ^ 1, 1U);
+        sp54 = Kyte_func_1134(arg1, objData->unk88 ^ 1, 0U);
+        var_v0 = Kyte_func_1134(arg1, objData->unk88 ^ 1, 1U);
     }
 
     if (sp54 == NULL || var_v0 == NULL) {
         return;
     }
 
-    if (arg0->unk22C != 0) {
-        if ((sp54 == arg0->unk1F0) && (sp54 != arg0->unkA4) && (sp54 != arg0->unkA8)) {
+    if (objData->unk22C != 0) {
+        if ((sp54 == objData->unk1F0) && (sp54 != objData->unkA4) && (sp54 != objData->unkA8)) {
             var_v1 = 1;
         } else {
             if (
-                (arg0->unk1F0 != arg0->unkA4) &&
-                (arg0->unk1F0 != arg0->unkA8) &&
-                (arg0->unk1F0 != arg0->unkAC) &&
-                (arg0->unk228 != arg0->unkA4) &&
-                (arg0->unk228 != arg0->unkA8) &&
-                (arg0->unk228 != arg0->unkAC)
+                (objData->unk1F0 != objData->unkA4) &&
+                (objData->unk1F0 != objData->unkA8) &&
+                (objData->unk1F0 != objData->unkAC) &&
+                (objData->unk228 != objData->unkA4) &&
+                (objData->unk228 != objData->unkA8) &&
+                (objData->unk228 != objData->unkAC)
             ) {
                 var_v1 = 1;
             } else {
@@ -357,27 +466,27 @@ void Kyte_func_F08(DLL212_Data* arg0, Object* arg1) {
             }
         }
     } else {
-        arg0->unk22C = 1;
+        objData->unk22C = 1;
         var_v1 = 1;
     }
 
     if (var_v1) {
-        arg0->unk1F0 = sp54;
+        objData->unk1F0 = sp54;
         temp = (s8*)&sp4E;
-        arg0->unk1FC.x = arg1->srt.transl.x;
-        arg0->unk1FC.y = arg1->srt.transl.y;
-        arg0->unk1FC.z = arg1->srt.transl.z;
-        arg0->unk208 = -1;
-        arg0->unk20F = arg0->unk88;
+        objData->unk1FC.x = arg1->srt.transl.x;
+        objData->unk1FC.y = arg1->srt.transl.y;
+        objData->unk1FC.z = arg1->srt.transl.z;
+        objData->unk208 = -1;
+        objData->unk20F = objData->unk88;
         sp4E = ((u8)var_v0->unk2C + (u8)sp54->unk2C) / 2;
-        arg0->unk220 = temp[0];
+        objData->unk220 = temp[0];
         sp4E = ((u8)var_v0->unk2D + (u8)sp54->unk2D) / 2;
-        arg0->unk221 = temp[0];
-        arg0->unk221 = (&sp4E)[-13];
-        arg0->unk222 = 0x10;
-        arg0->unk1F8 = 0;
-        arg0->unk20E = 5;
-        arg0->unk228 = var_v0;
+        objData->unk221 = temp[0];
+        objData->unk221 = (&sp4E)[-13];
+        objData->unk222 = 0x10;
+        objData->unk1F8 = 0;
+        objData->unk20E = 5;
+        objData->unk228 = var_v0;
     }
 }
 
@@ -714,7 +823,7 @@ static void Kyte_func_200C(Object* self, Kyte_Unk3* arg1, Kyte_Unk2* arg2, s32 a
 }
 
 // offset: 0x20A4 | func: 38
-f32 Kyte_func_20A4(Object* self, Kyte_Unk3* arg1, Kyte_Unk4* arg2, s32 arg3, s32 arg4) {
+static f32 Kyte_func_20A4(Object* self, Kyte_Unk3* arg1, Kyte_Unk4* arg2, s32 arg3, s32 arg4) {
     f32 spA4;
     f32 var_fv0_2;
     Kyte_Unk2* sp9C;
@@ -1070,7 +1179,7 @@ static s32 Kyte_func_2DA4(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* arg3, 
 }
 
 // offset: 0x300C | func: 42
-void Kyte_func_300C(Object* self) {
+static void Kyte_func_300C(Object* self) {
     ObjectShadow* sp2C;
     f32 sp28;
 
@@ -1485,7 +1594,7 @@ int Kyte_func_4040(Object* self, s32* arg1) {
 }
 
 // offset: 0x40BC | func: 53
-int Kyte_func_40BC(u8 arg0) {
+static int Kyte_func_40BC(u8 arg0) {
     return (data_148[arg0] + 1) == 0 || mainGetBits(data_148[arg0]) != 0;
 }
 

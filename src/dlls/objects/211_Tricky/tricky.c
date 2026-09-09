@@ -688,7 +688,7 @@ void dll_211_set_red_food_count(Object* self, s32 count) {
 }
 
 // offset: 0x12C8 | func: 20 | export: 19
-s32 dll_211_func_12C8(s32 arg0) {
+s32 dll_211_func_12C8(Object* self) {
     return 1;
 }
 

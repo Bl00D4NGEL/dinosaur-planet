@@ -44,7 +44,7 @@ DLL_INTERFACE(DLL_ISidekick) {
 	/*16*/ u8 (*get_red_food_count)(Object* self);
 	/*17*/ s32 (*get_blue_and_red_food_count)(Object* self);
 	/*18*/ void (*set_red_food_count)(Object* self, s32 amount);
-	/*19*/ s32 (*func19)(s32 arg0);
+	/*19*/ s32 (*func19)(Object* self);
 	/*20*/ void (*func20)(Object* self, UNK_TYPE_32 arg1, UNK_TYPE_32 arg2, UNK_TYPE_32 arg3);
 	/*21*/ void (*func21)(Object* self, s32 arg1, Object* arg2);
 	/*22*/ void (*func22)(Object* self, Object* arg1);
