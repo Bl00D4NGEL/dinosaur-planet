@@ -74,7 +74,14 @@ typedef struct {
     s16 unk110; // route goal
     s16 unk112;
     CurveSetup* unk114;
-    u8 pad118[0x1D8 - 0x118];
+    u8 pad118[0x190 - 0x118];
+    u8 unk190;
+    u8 unk191;
+    u8 pad192[0x1C8 - 0x192];
+    s32 unk1C8;
+    u32 pad1CC;
+    s32 unk1D0;
+    s32 unk1D4;
     DLL212_3FF4 unk1D8;
     u8 pad1E4[0x1F0 - 0x1E4];
     CurveSetup* unk1F0;
@@ -110,7 +117,7 @@ typedef struct {
 
 typedef void (*Bss0_Callback)(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* arg3, s32* arg4, f32* arg5, Kyte_Unk3* arg6);
 
-/*0x0*/ static u32 data_0[] = {
+/*0x0*/ static s32 data_0[] = {
     0x0000000d, 0x00000005, 0xffffffff, 0x0000000b, 0x0000030a, 0x3f800000, 0x3f800000, 0x3f800000, 
     0x3f800000, 0x3f800000
 };
@@ -122,17 +129,14 @@ typedef void (*Bss0_Callback)(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* ar
     0x00000000, 0x00000009, 0x00000008, 0x00000004, 0x00000002, 0xffffffff, 0x3f800000, 0x3f800000, 
     0x3f800000, 0x3f800000, 0x00000000, 0x00000009, 0x00000008, 0x00000004, 0x00000002, 0xffffffff
 };
-/*0x94*/ static u32 data_94[] = {
-    0x3fc00000, 0x40200000, 0x41a00000, 0x3e19999a
+/*0x94*/ static Kyte_Unk2 data_94[] = {
+    { 1.5f, 2.5f, 20.0f, 0.15f, &data_0, 2 },
+    { 0.43f, 1.2f, 2.0f, 0.2f, &data_28, 3 },
+    { 0.1f, 0.4f, 0.47f, 0.2f, &data_54, 3 },
 };
-/*0xA4*/ static u32 data_A4[] = {
-    (u32)&data_0, 0x00000002, 0x3edc28f6, 0x3f99999a, 0x40000000, 0x3e4ccccd
-};
-/*0xBC*/ static u32 data_BC[] = {
-    (u32)&data_28, 0x00000003, 0x3dcccccd, 0x3ecccccd, 0x3ef0a3d7, 0x3e4ccccd
-};
-/*0xD4*/ static u32 data_D4[] = {
-    (u32)&data_54, 0x00000003, 0x00000002, 0x00000000, 0x00000001
+// unused? Maybe part of data_E8
+/*0xD4*/ static u32 data_DC[] = {
+    0x00000002, 0x00000000, 0x00000001
 };
 /*0xE8*/ static u32 data_E8 = 0x00000004;
 /*0xEC*/ static u32 data_EC[] = {
@@ -162,6 +166,8 @@ static CurveSetup *Kyte_func_1730(DLL212_Data *objData, CurveSetup *arg1, CurveS
 static CurveSetup *Kyte_func_18F8(DLL212_Data *objData, CurveSetup *arg1, s32 arg2, s32 arg3);
 static CurveSetup *Kyte_func_1D2C(DLL212_Data *objData, CurveSetup *setup, s32 arg2, s32 arg3);
 static CurveSetup* Kyte_func_1134(Object* self, u8 arg1, u8 arg2);
+static CurveSetup* Kyte_func_1404(DLL212_Data* arg0, CurveSetup* arg1, s32* arg2, s32 arg3);
+static void Kyte_func_200C(Object* self, Kyte_Unk3* arg1, Kyte_Unk2* arg2, s32 arg3);
 
 // offset: 0x0 | ctor
 void Kyte_ctor(void* dll) { }
@@ -262,7 +268,56 @@ u32 Kyte_obj_GetDataSize(Object* self, u32 offsetAddr) {
 #pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_CDC.s")
 
 // offset: 0xCE8 | func: 28
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_CE8.s")
+void Kyte_func_CE8(Object* arg0, DLL212_Data* arg1) {
+    s32 sp3C;
+    s32 sp38;
+    CurveSetup* var_s0;
+    CurveSetup* sp30;
+
+    sp38 = mainGetBits(BIT_454);
+    if (sp38 != 0) {
+        sp3C = mainGetBits(BIT_Kyte_Flight_Curve);
+        if (sp3C == 0) {
+            sp3C = gDLL_25->vtbl->func_2A50(arg0, -1)->base_type22.unk4;
+            mainSetBits(BIT_Kyte_Flight_Curve, sp3C);
+        }
+        // FAKE
+        if (1);
+        var_s0 = gDLL_25->vtbl->func_2A50(arg0, sp3C);
+        if (var_s0 == NULL) {
+            return;
+        }
+    } else {
+        var_s0 = gDLL_25->vtbl->func_2A50(arg0, -1);
+        if (var_s0 != NULL) {
+            sp3C = var_s0->base_type22.unk4;
+            mainSetBits(BIT_Kyte_Flight_Curve, sp3C);
+        } else {
+            return;
+        }
+    }
+
+    if (var_s0->unk1A < 0x18) {
+        if (sp38 != 0) {
+            arg0->srt.transl.x = var_s0->pos.x;
+            arg0->srt.transl.y = var_s0->pos.y;
+            arg0->srt.transl.z = var_s0->pos.z;
+        }
+        arg1->unk22C = 0;
+        ((u8*)arg1)[5] = 0;
+        arg1->unk88 = 0;
+        sp30 = Kyte_func_1404(arg1, var_s0, (s32* ) &sp3C, 0);
+        if (gDLL_25->vtbl->func_1D30((UnkCurvesStruct* ) &arg1->unk4[1], var_s0, sp30, Kyte_func_1404(arg1, sp30, &sp3C, arg1->unk88)) == 0) {
+            Kyte_func_200C(arg0, (Kyte_Unk3* ) arg1->pad118, data_94, 2);
+            arg1->unk190 = 0;
+            arg1->unk191 = 0;
+            arg1->unk1D0 = -1;
+            arg1->unk1D4 = -1;
+            arg1->unk1C8 = 0;
+            ((u8*)arg1)[4] = 1;
+        }
+    }
+}
 
 // offset: 0xF08 | func: 29
 void Kyte_func_F08(DLL212_Data* arg0, Object* arg1) {
@@ -389,7 +444,7 @@ static CurveSetup* Kyte_func_1134(Object* self, u8 arg1, u8 arg2) {
 }
 
 // offset: 0x1404 | func: 31
-CurveSetup* Kyte_func_1404(DLL212_Data* arg0, CurveSetup* arg1, s32* arg2, s32 arg3) {
+static CurveSetup* Kyte_func_1404(DLL212_Data* arg0, CurveSetup* arg1, s32* arg2, s32 arg3) {
     CurveSetup* var_s1;
     CurveSetup* sp28;
 
@@ -641,7 +696,7 @@ static Object* Kyte_getClosestTarget(Object* self, s32 flag) {
 }
 
 // offset: 0x200C | func: 37
-void Kyte_func_200C(Object* self, Kyte_Unk3* arg1, Kyte_Unk2* arg2, s32 arg3) {
+static void Kyte_func_200C(Object* self, Kyte_Unk3* arg1, Kyte_Unk2* arg2, s32 arg3) {
     arg1->unk0 = arg3;
     arg1->unk4 = arg3;
     arg1->unkC = arg3;
