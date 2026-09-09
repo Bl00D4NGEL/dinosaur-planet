@@ -110,10 +110,6 @@ typedef void (*Bss0_Callback)(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* ar
     0x00000000, 0x00000000, 0x3f800000
 };
 /*0x168*/ static u32 data_168 = 0xffffffff;
-/*0x16C*/ static u32 data_16C[] = {
-    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
-    0x00000000, 0x00000000, 0x00000000, 0x00000000
-};
 
 /*0x0*/ static Bss0_Callback bss_0[4];
 
@@ -241,43 +237,110 @@ u32 Kyte_obj_GetDataSize(Object* self, u32 offsetAddr) {
 #pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_1864.s")
 
 // offset: 0x18F8 | func: 34
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_18F8.s")
-
-// offset: 0x1D2C | func: 35
-CurveSetup* Kyte_func_1D2C(Object *self, CurveSetup* setup, s32 arg2, s32 arg3) {
-    CurveSetup *sp68[4];
-    f32 temp_fv0;
-    f32 var_fs0;
+CurveSetup* Kyte_func_18F8(Object* self, CurveSetup* arg1, s32 arg2, s32 arg3) {
+    CurveSetup* setups[12] = { NULL };
+    u16 sp86;
+    u16 lowestLinkIdx;
+    u16 setupIdx;
+    u16 linkIdx;
+    f32 currentDistance;
+    u16 var_s4;
     Object* player;
-    u16 var_s0;
-    u16 var_s2;
-    u16 var_s5;
+    f32 lowestDistance;
+    u16 subLinkIdx;
+    u16 subSetupIdx;
+    u8 sp6B;
+    u8 var_s2;
 
     player = objGetPlayer();
-
-    for (var_s0 = 0, var_s5 = 0, var_s2 = 1; var_s0 < 4; var_s0++, var_s2 <<= 1, arg3 <<= 1) {
-        // FAKE
-        if (var_s2 && var_s2 && var_s2);
-
-        if (setup->links[var_s0] >= 0 && ((arg3 & 0xFFFFFFFF) == (setup->unk1B & var_s2)) != 0) {
-            sp68[var_s5] = gDLL_26_Curves->vtbl->func_39C(setup->links[var_s0]);
-            if (sp68[var_s5] != NULL && (arg2 == -1 || setup->base_type22.unk4 == sp68[var_s5]->base_type22.unk4)) {
-                var_s5++;
+    linkIdx = 0;
+    sp6B = arg3;
+    sp86 = 1;
+    for (linkIdx = 0, setupIdx = 0; linkIdx < 4; linkIdx++, sp86 <<= 1, sp6B <<= 1) {
+        if (arg1->links[linkIdx] >= 0 && (arg1->unk1B & sp86) - sp6B == 0) {
+            setups[setupIdx] = gDLL_26_Curves->vtbl->func_39C(arg1->links[linkIdx]);
+            if (setups[setupIdx] != NULL) {
+                if (
+                    (setups[setupIdx]->type22.unk30 == -1 || mainGetBits(setups[setupIdx]->type22.unk30) != 0) &&
+                    (setups[setupIdx]->type22.usedBit == -1 || mainGetBits(setups[setupIdx]->type22.usedBit) == 0) &&
+                    (arg2 == setups[setupIdx]->base_type22.unk4 || (arg2 == -1 && setups[setupIdx]->unk1A < 3))
+                ) {
+                    for (subLinkIdx = 0, var_s2 = arg3, subSetupIdx = setupIdx + 1, var_s4 = 1; subLinkIdx < 4; subLinkIdx++, var_s4 <<= 1, var_s2 <<= 1) {
+                        if (setups[setupIdx]->links[subLinkIdx] >= 0 && (setups[setupIdx]->unk1B & var_s4) - var_s2 == 0) {
+                            setups[subSetupIdx] = gDLL_26_Curves->vtbl->func_39C(setups[setupIdx]->links[subLinkIdx]);
+                            if (setups[subSetupIdx] != NULL) {
+                                if ((setups[subSetupIdx]->type22.unk30 == -1 || mainGetBits(setups[subSetupIdx]->type22.unk30) != 0) &&
+                                    (setups[subSetupIdx]->type22.usedBit == -1 || mainGetBits(setups[subSetupIdx]->type22.usedBit) == 0) &&
+                                    (arg2 == setups[subSetupIdx]->base_type22.unk4 || (arg2 == -1 && setups[subSetupIdx]->unk1A < 3))) {
+                                    subSetupIdx++;
+                                } else {
+                                    setups[subSetupIdx] = NULL;
+                                }
+                            }
+                        }
+                    }
+                    setupIdx += 4;
+                } else {
+                    setups[setupIdx] = NULL;
+                }
             }
         }
     }
 
-    if (var_s5) {
-        var_fs0 = vec3DistanceSquared(&player->globalPosition, &sp68[0]->pos);
-        var_s2 = 0;
-        for (var_s0 = 1; var_s0 < var_s5; var_s0++) {
-            temp_fv0 = vec3DistanceSquared(&player->globalPosition, &sp68[var_s0]->pos);
-            if (temp_fv0 < var_fs0) {
-                var_fs0 = temp_fv0;
-                var_s2 = var_s0;
+    if (setupIdx) {
+        lowestDistance = vec3DistanceSquared(&player->globalPosition, &setups[0]->pos);
+        lowestLinkIdx = 0;
+        for (linkIdx = 0; linkIdx < setupIdx; linkIdx++) {
+            if (setups[linkIdx] != NULL) {
+                currentDistance = vec3DistanceSquared(&player->globalPosition, &setups[linkIdx]->pos);
+                if (trackIsSphereInFrustum(&setups[linkIdx]->pos, 0.0f) != 0) {
+                    currentDistance *= 0.0625f;
+                }
+                if (currentDistance < lowestDistance) {
+                    lowestDistance = currentDistance;
+                    lowestLinkIdx = linkIdx;
+                }
             }
         }
-        return sp68[var_s2];
+        return setups[lowestLinkIdx - (lowestLinkIdx % 4)];
+    }
+    return NULL;
+}
+
+// offset: 0x1D2C | func: 35
+CurveSetup* Kyte_func_1D2C(Object *self, CurveSetup* setup, s32 arg2, s32 arg3) {
+    CurveSetup *setups[4];
+    f32 currentDistance;
+    f32 lowestDistance;
+    Object* player;
+    u16 linkIdx;
+    u16 lowestLinkIdx;
+    u16 setupIdx;
+
+    player = objGetPlayer();
+    for (linkIdx = 0, setupIdx = 0, lowestLinkIdx = 1; linkIdx < 4; linkIdx++, lowestLinkIdx <<= 1, arg3 <<= 1) {
+        // FAKE
+        if (lowestLinkIdx && lowestLinkIdx && lowestLinkIdx);
+
+        if (setup->links[linkIdx] >= 0 && ((setup->unk1B & lowestLinkIdx) - arg3) == 0) {
+            setups[setupIdx] = gDLL_26_Curves->vtbl->func_39C(setup->links[linkIdx]);
+            if (setups[setupIdx] != NULL && (arg2 == -1 || setup->base_type22.unk4 == setups[setupIdx]->base_type22.unk4)) {
+                setupIdx++;
+            }
+        }
+    }
+
+    if (setupIdx) {
+        lowestDistance = vec3DistanceSquared(&player->globalPosition, &setups[0]->pos);
+        lowestLinkIdx = 0;
+        for (linkIdx = 1; linkIdx < setupIdx; linkIdx++) {
+            currentDistance = vec3DistanceSquared(&player->globalPosition, &setups[linkIdx]->pos);
+            if (currentDistance < lowestDistance) {
+                lowestDistance = currentDistance;
+                lowestLinkIdx = linkIdx;
+            }
+        }
+        return setups[lowestLinkIdx];
     }
 
     return NULL;

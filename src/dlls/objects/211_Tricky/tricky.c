@@ -1332,7 +1332,7 @@ static void dll_211_func_3188(Object* self, DLL211_Data* objData) {
         if (objData->unk1A == 0) {
             if (vec3DistanceXZSquared(&self->globalPosition, &objData->unk28->globalPosition) > 400.0f) {
                 sp38 = mapFindObjSetup(((s32*)sp38)[7 /* unk1C */], NULL, NULL, NULL, NULL);
-                dll_211_func_9024(objData, &sp38->x);
+                dll_211_func_9024(objData, (Vec3f*)&sp38->x);
                 objData->unk1A = 1;
             } else {
                 objData->unk5E4[1] = mapFindObjSetup(((s32*)sp38)[7 /* unk1C */], NULL, NULL, NULL, NULL);
