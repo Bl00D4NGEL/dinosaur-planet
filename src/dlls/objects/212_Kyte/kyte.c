@@ -244,7 +244,44 @@ u32 Kyte_obj_GetDataSize(Object* self, u32 offsetAddr) {
 #pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_18F8.s")
 
 // offset: 0x1D2C | func: 35
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_1D2C.s")
+CurveSetup* Kyte_func_1D2C(Object *self, CurveSetup* setup, s32 arg2, s32 arg3) {
+    CurveSetup *sp68[4];
+    f32 temp_fv0;
+    f32 var_fs0;
+    Object* player;
+    u16 var_s0;
+    u16 var_s2;
+    u16 var_s5;
+
+    player = objGetPlayer();
+
+    for (var_s0 = 0, var_s5 = 0, var_s2 = 1; var_s0 < 4; var_s0++, var_s2 <<= 1, arg3 <<= 1) {
+        // FAKE
+        if (var_s2 && var_s2 && var_s2);
+
+        if (setup->links[var_s0] >= 0 && ((arg3 & 0xFFFFFFFF) == (setup->unk1B & var_s2)) != 0) {
+            sp68[var_s5] = gDLL_26_Curves->vtbl->func_39C(setup->links[var_s0]);
+            if (sp68[var_s5] != NULL && (arg2 == -1 || setup->base_type22.unk4 == sp68[var_s5]->base_type22.unk4)) {
+                var_s5++;
+            }
+        }
+    }
+
+    if (var_s5) {
+        var_fs0 = vec3DistanceSquared(&player->globalPosition, &sp68[0]->pos);
+        var_s2 = 0;
+        for (var_s0 = 1; var_s0 < var_s5; var_s0++) {
+            temp_fv0 = vec3DistanceSquared(&player->globalPosition, &sp68[var_s0]->pos);
+            if (temp_fv0 < var_fs0) {
+                var_fs0 = temp_fv0;
+                var_s2 = var_s0;
+            }
+        }
+        return sp68[var_s2];
+    }
+
+    return NULL;
+}
 
 // offset: 0x1F14 | func: 36
 static Object* Kyte_getClosestTarget(Object* self, s32 flag) {
