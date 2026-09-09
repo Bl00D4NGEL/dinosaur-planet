@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sys/route.h"
 #include "sys/objtype.h"
 #include "sys/objlib.h"
 #include "dlls/objects/278_flameblast.h"
@@ -63,11 +64,18 @@ typedef struct {
     s32 unk38;
     s32 unk3C;
     s32 unk40;
-    u8 pad44[0x1D8 - 0x44];
+    u8 pad44[0x88 - 0x44];
+    s32 unk88;
+    u8 pad8C[0x110 - 0x8C];
+    s32 unk110; // route goal
+    u8 pad114[0x1D8 - 0x114];
     DLL212_3FF4 unk1D8;
     u8 pad1E4[0x238 - 0x1E4];
     s32 unk238;
-    u8 pad23C[0x278 - 0x23C];
+    u32 pad23C;
+    Route unk240;
+    CurveSetup* unk270;
+    CurveSetup* unk274;
 } DLL212_Data;
 
 typedef void (*Bss0_Callback)(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* arg3, s32* arg4, f32* arg5, Kyte_Unk3* arg6);
@@ -119,6 +127,7 @@ static s32 Kyte_func_3A2C(Object* self, DLL212_Data* objdata);
 static s32 Kyte_func_27D8(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* arg3, s32* arg4, f32* arg5, Kyte_Unk3* arg6);
 static s32 Kyte_func_2B58(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* arg3, s32* arg4, f32* arg5, Kyte_Unk3* arg6);
 static s32 Kyte_func_2DA4(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* arg3, s32* arg4, f32* arg5, Kyte_Unk3* arg6);
+static CurveSetup* Kyte_func_1864(CurveSetup* arg0);
 
 // offset: 0x0 | ctor
 void Kyte_ctor(void* dll) { }
@@ -231,13 +240,43 @@ u32 Kyte_obj_GetDataSize(Object* self, u32 offsetAddr) {
 #pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_1404.s")
 
 // offset: 0x1730 | func: 32
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_1730.s")
+CurveSetup* Kyte_func_1730(DLL212_Data* objData, CurveSetup* arg1, CurveSetup* arg2) {
+    if (arg2 == objData->unk274 && arg1 == objData->unk270) {
+        // FAKE
+        if (1);
+
+        objData->unk270 = routeNext(&objData->unk240);
+        if (objData->unk270 == NULL) {
+            return NULL;
+        }
+        objData->unk270 = Kyte_func_1864(objData->unk270);
+        if (objData->unk270 != NULL) {
+            return objData->unk270;
+        }
+    }
+
+    routeSetup(&objData->unk240, arg1, &arg2->pos, &objData->unk110, objData->unk88);
+    if (routeFind(&objData->unk240, 200) != 1) {
+        return NULL;
+    }
+
+    routeReconstruct(&objData->unk240);
+    objData->unk270 = routeNext(&objData->unk240);
+    objData->unk274 = arg2;
+    return objData->unk270;
+}
 
 // offset: 0x1864 | func: 33
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_1864.s")
+static CurveSetup* Kyte_func_1864(CurveSetup* arg0) {
+    if ((arg0->type22.unk30 == -1 || mainGetBits(arg0->type22.unk30) != 0) && (arg0->type22.usedBit == -1 || mainGetBits(arg0->type22.usedBit) == 0)) {
+        return arg0;
+    }
+
+    return NULL;
+}
 
 // offset: 0x18F8 | func: 34
-CurveSetup* Kyte_func_18F8(Object* self, CurveSetup* arg1, s32 arg2, s32 arg3) {
+CurveSetup* Kyte_func_18F8(UNK_TYPE_32 arg0, CurveSetup* arg1, s32 arg2, s32 arg3) {
     CurveSetup* setups[12] = { NULL };
     u16 sp86;
     u16 lowestLinkIdx;
