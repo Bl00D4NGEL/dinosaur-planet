@@ -401,8 +401,11 @@ void Kyte_func_C74(Object* self, UNK_TYPE_32 arg1, UNK_TYPE_32 arg2, UNK_TYPE_32
 }
 
 // offset: 0xC8C | func: 23 | export: 21
-void Kyte_func_C8C(Object* self, s32 arg1, Object* arg2);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_func_C8C.s")
+void Kyte_func_C8C(Object* self, s32 arg1, Object* arg2) {
+    // FAKE
+    // wtf IDO
+    if (arg1);
+}
 
 // offset: 0xC9C | func: 24 | export: 22
 void Kyte_func_C9C(Object* self, Object* arg1) {
