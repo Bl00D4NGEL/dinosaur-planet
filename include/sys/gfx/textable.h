@@ -226,7 +226,7 @@ enum TexTable {
     TEXTABLE_DC = 0xDC, // TEX0:269
     TEXTABLE_DD = 0xDD, // TEX0:270
     TEXTABLE_DE = 0xDE, // TEX0:271
-    TEXTABLE_DF = 0xDF, // TEX0:276
+    TEXTABLE_DF_StarBlue = 0xDF, // TEX0:276
     TEXTABLE_E0 = 0xE0, // TEX0:277
     TEXTABLE_E1 = 0xE1, // TEX0:307
     TEXTABLE_E2 = 0xE2, // TEX0:308
@@ -459,7 +459,7 @@ enum TexTable {
     TEXTABLE_1C5_CMDMENU_InfoScroll_BG = 0x1C5, // TEX0:521
     TEXTABLE_1C6_CMDMENU_InfoScroll_SelfShadow = 0x1C6, // TEX0:522
     TEXTABLE_1C7_CMDMENU_Early_Krystal = 0x1C7, // TEX0:529             [OLD UI]
-    TEXTABLE_1C8 = 0x1C8, // TEX0:530
+    TEXTABLE_1C8_CMDMENU_Early_Energy_Bar = 0x1C8, // TEX0:530          [OLD UI] (Used by DIMSnowHorn)
     TEXTABLE_1C9_CMDMENU_Grub_Blue_Full = 0x1C9, // TEX0:580
     TEXTABLE_1CA = 0x1CA, // TEX0:531
     TEXTABLE_1CB_CMDMENU_Grub_Blue_Half = 0x1CB, // TEX0:581
@@ -787,7 +787,7 @@ enum TexTable {
     TEXTABLE_30D = 0x30D, // TEX0:752
     TEXTABLE_30E = 0x30E, // TEX0:753
     TEXTABLE_30F = 0x30F, // TEX0:0
-    TEXTABLE_310 = 0x310, // TEX0:754
+    TEXTABLE_310_PauseMenu_Dusters = 0x310, // TEX0:754
     TEXTABLE_311 = 0x311, // TEX0:0
     TEXTABLE_312 = 0x312, // TEX0:0
     TEXTABLE_313_Textbox_Centre_1 = 0x313, // TEX0:743

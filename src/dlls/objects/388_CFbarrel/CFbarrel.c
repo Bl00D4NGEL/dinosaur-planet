@@ -95,7 +95,7 @@ void CFbarrel_setup(Object* self, CFbarrel_Setup* setup, s32 reset) {
     self->objhitInfo->unk58 = self->objhitInfo->unk58;
     func_8002674C(self);
     objdata->unk24 = (f32) self->objhitInfo->unk52;
-    mainCreateTempDLL(DLL_ID_53_MOVELIB);
+    mainCreateTempDLL(DLL_ID_MOVELIB);
 }
 
 // offset: 0x190 | func: 1 | export: 1
@@ -250,7 +250,7 @@ void CFbarrel_free(Object* self, s32 onlySelf) {
     if (objdata->unk13 != 0) {
         gDLL_13_Expgfx->vtbl->func5(self);
     }
-    mainRemoveTempDLL(DLL_ID_53_MOVELIB);
+    mainRemoveTempDLL(DLL_ID_MOVELIB);
 }
 
 // offset: 0xAB0 | func: 5 | export: 5
@@ -406,7 +406,7 @@ static void CFbarrel_func_1214(Object* self) {
             explSetup->base.x = self->srt.transl.x;
             explSetup->base.y = self->srt.transl.y;
             explSetup->base.z = self->srt.transl.z;
-            objSetupObject((ObjSetup*)explSetup, OBJINIT_STANDALONE | OBJINIT_FLAG4, self->mapID, -1, self->parent);
+            objSetupObject(&explSetup->base, OBJINIT_STANDALONE | OBJINIT_FLAG4, self->mapID, -1, self->parent);
             objdata->unk13 = 1;
             if (self->parent != NULL) {
                 objdata->unk2C = 3.5f;

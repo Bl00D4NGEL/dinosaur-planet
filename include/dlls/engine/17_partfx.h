@@ -19,6 +19,7 @@ enum ParticleID {
     PARTICLE_5A = 0x5A,
     PARTICLE_5B = 0x5B,
     PARTICLE_69 = 0x69, //nothing?
+    PARTICLE_6B = 0x6B,
     PARTICLE_6D = 0x6D,
     PARTICLE_75 = 0x75, //Transporter - horizontal blue magic explosion
     PARTICLE_77 = 0x77,
@@ -27,6 +28,7 @@ enum ParticleID {
     PARTICLE_7A = 0x7A, //Transporter - small sparkles (floating outward, then attracting inwards)
     PARTICLE_84 = 0x84, // implemented by DLL 40
     PARTICLE_85 = 0x85, // implemented by DLL 40
+    PARTICLE_86 = 0x86,
     /* --- DLL 40 START --- */
     PARTICLE_8A = 0x8A,
     PARTICLE_8C = 0x8C,
@@ -60,6 +62,8 @@ enum ParticleID {
     PARTICLE_19E = 0x19E,
     PARTICLE_19F = 0x19F,
     PARTICLE_1A0 = 0x1A0,
+    PARTICLE_1A3 = 0x1A3,
+    PARTICLE_1A5 = 0x1A5,
     PARTICLE_1A9 = 0x1A9,
     PARTICLE_1AA = 0x1AA,
     PARTICLE_1AB = 0x1AB,
@@ -78,6 +82,7 @@ enum ParticleID {
     /* --- DLL 36 START --- */
     PARTICLE_1F4 = 0x1F4,
     PARTICLE_1F7 = 0x1F7,
+    PARTICLE_1F9 = 0x1F9,
     PARTICLE_202 = 0x202,
     PARTICLE_203 = 0x203, //fire
     PARTICLE_204 = 0x204, //floating ember
@@ -91,6 +96,7 @@ enum ParticleID {
     PARTICLE_27A = 0x27A, //glowing pink magic flares (DBSH_Symbol)
     PARTICLE_286 = 0x286,
     PARTICLE_28A = 0x28A,
+    PARTICLE_28B = 0x28B,
     PARTICLE_2BB = 0x2BB,
     /* --- DLL 35 END --- */
     PARTICLE_320 = 0x320, // big expanding cloud of mist         (WaterWallSpray)
@@ -125,7 +131,11 @@ enum ParticleID {
     /* --- DLL 41 START --- */
     PARTICLE_352 = 0x352,
     PARTICLE_353 = 0x353,
+    PARTICLE_354 = 0x354,
     PARTICLE_355 = 0x355,
+    PARTICLE_356 = 0x356,
+    PARTICLE_35B = 0x35B,
+    PARTICLE_35C = 0x35C,
     PARTICLE_383 = 0x383,
     /* --- DLL 41 END --- */
     /* --- DLL 34 START --- */
@@ -199,6 +209,12 @@ enum ParticleID {
     PARTICLE_525 = 0x525,
     PARTICLE_526 = 0x526,
     PARTICLE_529 = 0x529,
+    PARTICLE_52A = 0x52A,
+    PARTICLE_53C = 0x53C,
+    PARTICLE_53D = 0x53D,
+    PARTICLE_545 = 0x545,
+    PARTICLE_546 = 0x546,
+    PARTICLE_547 = 0x547,
     PARTICLE_549 = 0x549,
     PARTICLE_54A = 0x54A,
     PARTICLE_54B = 0x54B,
@@ -212,6 +228,8 @@ enum ParticleID {
     PARTICLE_553 = 0x553,
     PARTICLE_554 = 0x554,
     PARTICLE_555 = 0x555,
+    PARTICLE_556 = 0x556,
+    PARTICLE_55E = 0x55E,
     /* --- DLL 34 START --- */
     PARTICLE_5DD = 0x5DD,
     PARTICLE_5ED = 0x5ED,
@@ -241,6 +259,7 @@ enum ParticleID {
     PARTICLE_713 = 0x713,
     PARTICLE_717 = 0x717,
     PARTICLE_718 = 0x718,
+    PARTICLE_724 = 0x724,
     PARTICLE_739 = 0x739,
     /* --- DLL 51 END --- */
     /* --- DLL 50 START --- */
@@ -248,6 +267,8 @@ enum ParticleID {
     PARTICLE_73B = 0x73B,
     PARTICLE_73D = 0x73D,
     PARTICLE_73E = 0x73E,
+    PARTICLE_73F = 0x73F,
+    PARTICLE_740 = 0x740,
     PARTICLE_741 = 0x741,
     PARTICLE_76B = 0x76B,
     /* --- DLL 50 END --- */
@@ -265,7 +286,9 @@ enum PartfxFlags {
     PARTFXFLAG_10 = 0x10,
     PARTFXFLAG_800 = 0x800,
     PARTFXFLAG_10000 = 0x10000,
-    PARTFXFLAG_200000 = 0x200000
+    PARTFXFLAG_200000 = 0x200000,
+    PARTFXFLAG_2000000 = 0x2000000,
+    PARTFXFLAG_4000000 = 0x4000000
 };
 
 // Interface for DLLs 34-52, which implement many of the particle routines that DLL 17 does not handle.
@@ -284,5 +307,7 @@ DLL_INTERFACE(DLL_17) {
 /*1*/ s32 (*spawn)(Object *obj, s32 id, SRT *transform, s32 flags, s8 arg4, void *data);
 /*2*/ s32 (*func2)(s32 arg0);
 };
+
+#define dll_partfx (gDLL_17_partfx->vtbl)
 
 #endif // _DLL_17_H

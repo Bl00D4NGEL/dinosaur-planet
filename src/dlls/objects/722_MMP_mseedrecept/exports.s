@@ -15,7 +15,7 @@ _exports:
 /*4*/ .dword MoonSeedReceptacle_obj_Free
 /*5*/ .dword MoonSeedReceptacle_obj_GetModelFlags
 /*6*/ .dword MoonSeedReceptacle_obj_GetDataSize
-/*7*/ .dword MoonSeedReceptacle_KyteTarget_Interact
-/*8*/ .dword MoonSeedReceptacle_KyteTarget_Func_D00
-/*9*/ .dword MoonSeedReceptacle_KyteTarget_Approach
-/*10*/ .dword MoonSeedReceptacle_KyteTarget_Func_D30
+/*7*/ .dword MoonSeedReceptacle_Func_BEC
+/*8*/ .dword MoonSeedReceptacle_Func_D00
+/*9*/ .dword MoonSeedReceptacle_Func_D18
+/*10*/ .dword MoonSeedReceptacle_Func_D30

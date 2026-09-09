@@ -30,14 +30,11 @@ typedef struct {
 
 // size: 0x14
 typedef struct {
-    s16 unk0;
-    s16 unk2;
+    s16 unk0[2];
     s16 unk4;
     s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
+    s16 unk8[2];
+    s16 unkC[2];
     s16 isInside;
     s16 unk12; //cameraActionID?
 } PlayerLightActions;
@@ -294,5 +291,7 @@ DLL_INTERFACE(DLL_29_gplay) {
     /*47*/ u32 (*is_cinema_unlocked)(u8 cinemaIdx);
     /*48*/ void (*unlock_cinema)(u8 cinemaIdx);
 };
+
+#define dll_gplay (gDLL_29_Gplay->vtbl)
 
 #endif //_DLLS_29_H

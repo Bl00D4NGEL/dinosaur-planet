@@ -115,10 +115,20 @@ typedef struct {
 
         s16 somePos[6];
     };
-/*0c*/    s8 heightA; //height can be treated as a single value "(heightA << 8) + heightB", depending on top settings bit
-/*0d*/    s8 heightB;
+union { //height can be treated as a single s16 value, using the uppermost bit of settingsA
+    struct {
+    /*0c*/    s8 heightA;
+    /*0d*/    s8 heightB;
+    };
+    /*0c*/    s16 heightUnified;
+};
+#ifndef AVOID_UB
 /*0e*/    s8 settingsA;
 /*0f*/    s8 settingsB;
+#else
+/*0e*/    u8 settingsA;
+/*0f*/    u8 settingsB;
+#endif
 /*10*/    s16 animatorID;
 /*12*/    s16 pad;
 } ModLine;
@@ -129,11 +139,21 @@ typedef struct {
   * and referencing those verts by index?
 */
 // size: 0x10
-typedef struct{
-/*00*/    s8 heightA;
-/*01*/    s8 heightB;
+typedef struct {
+union { //height can be treated as a single s16 value, using the uppermost bit of settingsA
+    struct {
+    /*00*/    s8 heightA;
+    /*01*/    s8 heightB;
+    };
+    /*00*/    s16 heightUnified;
+};
+#ifndef AVOID_UB
 /*02*/    s8 settingsA;
 /*03*/    s8 settingsB;
+#else
+/*02*/    u8 settingsA;
+/*03*/    u8 settingsB;
+#endif
 union {
     struct {
     /*04*/    s16 indexA; 
@@ -145,7 +165,17 @@ union {
 };
 /*0c*/    s16 animatorID;
 /*0e*/    s16 unkE;
-} ModLineReencoded;
+} ModLineReencoded; 
+
+//TO-DO: maybe move TrackLine (HitsLine/ModLine) realted structs/enums to a different header (intersect.h/map.h?)
+typedef enum {
+    TrackLine_SETTINGA_Unified_Height = 0x80 //The line's height is read as a single s16 value, instead of separate s8 heights above pointA/pointB
+} TrackLineSettingsA;
+
+typedef enum {
+    TrackLine_SETTINGB_Deactivated = 0x40,   //Line currently has no effect (can be toggled via HitAnimator)
+    TrackLine_SETTINGB_Nonsolid = 0x80       //Player can pass through
+} TrackLineSettingsB;
 
 typedef struct {
     s16 unk0;             //always 0 in ROM

@@ -137,10 +137,20 @@ typedef struct{
 /*06*/    s16 By;
 /*08*/    s16 Az;
 /*0a*/    s16 Bz;
-/*0c*/    s8 heightA; //height can be treated as a single value "(heightA << 8) + heightB", depending on top settings bit
-/*0d*/    s8 heightB;
+union { //height can be treated as a single s16 value, using the uppermost bit of settingsA
+    struct {
+    /*0c*/    s8 heightA;
+    /*0d*/    s8 heightB;
+    };
+    /*0c*/    s16 heightUnified;
+};
+#ifndef AVOID_UB
 /*0e*/    s8 settingsA;
 /*0f*/    s8 settingsB;
+#else
+/*0e*/    u8 settingsA;
+/*0f*/    u8 settingsB;
+#endif
 /*10*/    s16 animatorID;
 /*12*/    s16 pad;
 } HitsLine;
@@ -165,7 +175,7 @@ typedef struct {
 /*003A*/    s8 unk3A;
 /*003B*/    s8 unk3B;
 /*003C*/    s16 unk3C;
-/*003E*/    s16 unk3E; // pointer to animated vertices, maybe?
+/*003E*/    s16 unk3E;
 /*0040*/    s16 minY; // lowest vertex elevation
 /*0042*/    s16 maxY; // highest vertex elevation
 /*0044*/    u16 modelSize; // length of decompressed model
@@ -304,11 +314,6 @@ typedef struct {
 /*0b*/  s8 unkB;
 } GlobalMapCell; //size 0xC
 
-typedef struct {
-  Vec3f coord;
-  s32 layer;
-} Warp;
-
 // size: 0xA
 typedef struct Struct_D_800B9768_unk4 {
     s16 xMin;
@@ -414,20 +419,6 @@ typedef struct {
 /*000C*/    f32 d;
 /*0010*/    u8 unk14[4];
 } Plane;
-
-typedef enum {
-    WARP_ICE_MOUNTAIN_CAMPSITE = 2, // Sabre's campsite cave
-    WARP_WM_SABRE_SIDE = 5,
-    WARP_WM_KRYSTAL_SIDE = 6,
-    WARP_SC_RUBBLE_PODIUM = 14, // SwapStone Circle
-    WARP_SH_ROCKY_PODIUM = 15, // SwapStone Hollow
-    WARP_IM_RACE_START = 26,
-    WARP_WM_SABRE_KRAZOA_CORRIDOR = 57, // Warlock Mountain | Sabre-side | Krazoa statue corridor
-    WARP_SC_TOTEM_POLE = 80,
-    WARP_VFP_CALDERA_LOWER = 81, // Volcano Force Point Temple | Caldera (Lower Floor) 
-    WARP_SC_DISCOVERY_FALLS_ENTRANCE_POND = 85, // SwapStone Circle | Pond outside Discovery Falls
-    WARP_SWAPSTONE_SHOP_ENTRANCE = 86
-} WarpID;
 
 typedef struct {
 /*00*/ ObjSetup base;
@@ -597,6 +588,28 @@ void mapSaveObject(ObjSetup* objsetup, s32 mapID, f32 x, f32 y, f32 z);
 
 // Warp
 
+typedef struct {
+  Vec3f coord;
+  s32 layer;
+} Warp;
+
+typedef enum {
+    WARP_ICE_MOUNTAIN_CAMPSITE = 2, // Sabre's campsite cave
+    WARP_WM_SABRE_SIDE = 5,
+    WARP_WM_KRYSTAL_SIDE = 6,
+    WARP_SC_RUBBLE_PODIUM = 14, // SwapStone Circle
+    WARP_SH_ROCKY_PODIUM = 15, // SwapStone Hollow
+    WARP_IM_RACE_START = 26,
+    WARP_WM_SABRE_KRAZOA_CORRIDOR = 57, // Warlock Mountain | Sabre-side | Krazoa statue corridor
+    WARP_SC_TOTEM_POLE = 80,
+    WARP_VFP_CALDERA_LOWER = 81, // Volcano Force Point Temple | Caldera (Lower Floor) 
+    WARP_SC_DISCOVERY_FALLS_ENTRANCE_POND = 85, // SwapStone Circle | Pond outside Discovery Falls
+    WARP_SWAPSTONE_SHOP_ENTRANCE = 86
+} WarpID;
+
+#define NO_WARP_ID -1
+#define FADE_IN_INITIAL -2
+#define WARP_FADE_IN_DELAY 8
 void mapWarpPlayer(s32 warpID, s8 fadeToBlack);
 
 #endif

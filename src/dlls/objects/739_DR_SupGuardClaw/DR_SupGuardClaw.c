@@ -8,6 +8,7 @@
 #include "dlls/engine/53_movelib.h"
 #include "dlls/objects/common/sidekick.h"
 #include "dlls/objects/210_player.h"
+#include "dlls/objects/215_SharpClaw.h"
 #include "dll.h"
 
 typedef struct {
@@ -57,17 +58,17 @@ typedef enum {
 };
 
 /*0x10*/ static TalkSounds dSoundsSharpClaw[] = {
-    {SOUND_236_SharpClaw_Argh,    0x1000},
-    {SOUND_239_SharpClaw_Snort,   0x1000}
+    {SOUND_236_SharpClaw_Argh,        0x1000},
+    {SOUND_239_SharpClaw_Rah_Snort,   0x1000}
 };
 
 /*0x18*/ static s16 dModAnimsSharpClaw[] = {
-    0, 
-    0x206, 
-    0x127, 
-    0, 
-    0x30a, 
-    0x0
+    SharpClaw_MODANIM0_0_Idle_LOOP, 
+    SharpClaw_MODANIM2_6_Campfire_Cold_LOOP, 
+    SharpClaw_MODANIM1_39_Hunched_Strafe_L_LOOP, 
+    SharpClaw_MODANIM0_0_Idle_LOOP, 
+    SharpClaw_MODANIM3_10_Head_Scratch, 
+    SharpClaw_MODANIM0_0_Idle_LOOP
 };
 
 //TODO: finish and move to GuardClaw header, or a separate header just for a model's modanim?
@@ -173,7 +174,7 @@ void DR_NPC_setup(Object* self, DR_NPC_Setup* objSetup, s32 reset) {
 
     self->stateFlags |= OBJSTATE_UPDATE_DISABLED;
 
-    mainCreateTempDLL(DLL_ID_53_MOVELIB);
+    mainCreateTempDLL(DLL_ID_MOVELIB);
     ((DLL_53_movelib*)(gTempDLLInsts[1]))->vtbl->func2(self, &objData->movedata, -0x11C7, 0x3554, 3);
     ((DLL_53_movelib*)(gTempDLLInsts[1]))->vtbl->func5(&objData->movedata, 300, 120);
     ((DLL_53_movelib*)(gTempDLLInsts[1]))->vtbl->func6(&objData->movedata, dDLL53Array2, dDLL53Array1, 3);
@@ -282,7 +283,7 @@ void DR_NPC_print(Object* self, Gfx** gdl, Mtx** mtxs, Vertex** vtxs, Triangle**
 void DR_NPC_free(Object* self, s32 onlySelf) {
     DR_NPC_Setup* objSetup = (DR_NPC_Setup*)self->setup;
 
-    mainRemoveTempDLL(DLL_ID_53_MOVELIB);
+    mainRemoveTempDLL(DLL_ID_MOVELIB);
 
     if (objSetup->characterType != DR_NPC_SharpClaw) {
         objFreeObjectType(self, OBJTYPE_Baddie);

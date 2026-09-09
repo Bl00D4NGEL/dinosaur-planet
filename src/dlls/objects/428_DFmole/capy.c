@@ -11,6 +11,8 @@
 #include "dlls/objects/210_player.h"
 #include "dll.h"
 
+#include "prevent_bss_reordering.h"
+
 // size:0x14
 typedef struct {
 /*00*/ u8 fed;
@@ -236,7 +238,7 @@ static void capy_func_704(Object *self, Baddie *baddie, ObjFSA_Data *fsa) {
 
     self->objhitInfo->unk58 &= ~0x1;
     
-    temp_v0_2 = gDLL_33_BaddieControl->vtbl->func17(self, fsa, baddie->unk3E2, 0x8000);
+    temp_v0_2 = gDLL_33_BaddieControl->vtbl->func17(self, fsa, baddie->unk3E2, M_180_DEGREES);
     if (temp_v0_2 != NULL) {
         fsa->target = temp_v0_2;
         fsa->unk33D = 0;

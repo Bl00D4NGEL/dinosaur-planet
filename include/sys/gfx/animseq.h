@@ -63,7 +63,7 @@ typedef struct {
     ObjSetup base;
     /** isObjSeq2CurveIndex (1 bit) | sequenceID (11 bits) | actorIndex (4 bits) */
     s16 sequenceIdBitfield;
-    s16 unk1A;
+    s16 unk1A; // event gamebit?
     s16 target; // target (actor) object ID + 4
     s8 unk1E;
     s8 seqSlot;
@@ -124,7 +124,7 @@ typedef struct AnimObj_Data {
 /*07C*/ s16 unk7C;
 /*07E*/ s8 unk7E[0x80 - 0x7E];
 /*08B*/ s32 unk80;
-/*084*/ s8 unk84; // unk type
+/*084*/ s8 unk84; // unk type (move mode)
 /*085*/ s8 overrideMode;
 /*086*/ s8 groundMode;
 /*087*/ s8 unk87;

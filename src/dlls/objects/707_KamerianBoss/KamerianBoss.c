@@ -34,7 +34,7 @@ typedef struct {
 /*2E*/ s16 leftPipeYOffset;
 /*30*/ u16 rightAcidAttackTimer;
 /*32*/ u16 leftAcidAttackTimer;
-/*34*/ s16 flameAttackTimer;
+/*34*/ u16 flameAttackTimer;
 /*36*/ u16 rightPipeTimer;
 /*38*/ u16 leftPipeTimer;
 /*3C*/ u32 soundHandle1;
@@ -51,10 +51,10 @@ typedef struct {
 } KamerianBoss_Setup;
 
 enum KDModAnims {
-    KD_MODANIM_DETATCH_LEFT_PIPE = 0,
-    KD_MODANIM_DETATCH_LEFT_PIPE_ALT = 1, // With right wing open
-    KD_MODANIM_DETATCH_RIGHT_PIPE = 2,
-    KD_MODANIM_DETATCH_RIGHT_PIPE_ALT = 3, // With left wing open
+    KD_MODANIM_DETACH_LEFT_PIPE = 0,
+    KD_MODANIM_DETACH_LEFT_PIPE_ALT = 1, // With right wing open
+    KD_MODANIM_DETACH_RIGHT_PIPE = 2,
+    KD_MODANIM_DETACH_RIGHT_PIPE_ALT = 3, // With left wing open
     KD_MODANIM_OPEN_LEFT_WING = 4,
     KD_MODANIM_OPEN_LEFT_WING_ALT = 5, // With right wing open
     KD_MODANIM_OPEN_RIGHT_WING = 6,
@@ -82,7 +82,7 @@ void KamerianBoss_ctor(void *dll) { }
 void KamerianBoss_dtor(void *dll) { }
 
 // offset: 0x18 | func: 0
-void KamerianBoss_enable_hit_sphere(s32 hitSphereIdx) {
+static void KamerianBoss_enable_hit_sphere(s32 hitSphereIdx) {
     s32 sp4;
 
     switch (hitSphereIdx) {
@@ -137,11 +137,11 @@ static Object* KamerianBoss_create_fx_emit(Object *self, f32 x, f32 y, f32 z, s3
 }
 
 // offset: 0x1B4 | func: 3
-void KamerianBoss_create_projectile(Object *self, f32 x, f32 y, f32 z, s16 arg4, s16 arg5, f32 arg6, s32 objID) {
+static void KamerianBoss_create_projectile(Object *self, f32 x, f32 y, f32 z, s16 yaw, s16 pitch, f32 speed, s32 objID) {
     ObjSetup *setup;
     Object *projectile;
 
-    setup = objAllocSetup(0x24, objID); // KamerianFlame/KamerianAcid
+    setup = objAllocSetup(0x24, objID); // KamerianFlame/KamerianAcid (TODO: use KamerianFlame_Setup)
     setup->x = x;
     setup->y = y;
     setup->z = z;
@@ -151,11 +151,11 @@ void KamerianBoss_create_projectile(Object *self, f32 x, f32 y, f32 z, s16 arg4,
     setup->fadeDistance = 0xFF;
     projectile = objSetupObject(setup, OBJINIT_STANDALONE | OBJINIT_FLAG4, -1, -1, NULL);
     if (projectile != NULL) {
-        projectile->srt.pitch = arg5;
-        projectile->srt.yaw = arg4;
-        projectile->velocity.x = Cosf(arg5) * Sinf(arg4) * arg6;
-        projectile->velocity.y = Sinf(arg5) * arg6;
-        projectile->velocity.z = Cosf(arg5) * Cosf(arg4) * arg6;
+        projectile->srt.pitch = pitch;
+        projectile->srt.yaw = yaw;
+        projectile->velocity.x = Cosf(pitch) * Sinf(yaw) * speed;
+        projectile->velocity.y = Sinf(pitch) * speed;
+        projectile->velocity.z = Cosf(pitch) * Cosf(yaw) * speed;
         projectile->unkC4 = self;
     }
 }
@@ -171,7 +171,7 @@ void KamerianBoss_setup(Object *self, KamerianBoss_Setup *setup, s32 arg2) {
     self->animCallback = NULL;
     objdata = self->data;
     self->srt.yaw = setup->yaw << 8;
-    objAnimSet(self, KD_MODANIM_DETATCH_RIGHT_PIPE, 0.0f, 0);
+    objAnimSet(self, KD_MODANIM_DETACH_RIGHT_PIPE, 0.0f, 0);
     bzero(objdata, sizeof(KamerianBoss_Data));
     objdata->health = 10;
     objdata->animTickDelta = 0.0f;
@@ -210,11 +210,7 @@ void KamerianBoss_setup(Object *self, KamerianBoss_Setup *setup, s32 arg2) {
 }
 
 // offset: 0x558 | func: 5
-#ifndef NON_MATCHING
-s16 KamerianBoss_func_558(f32 a0, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, s32 a8);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/707_KamerianBoss/KamerianBoss_func_558.s")
-#else
-s16 KamerianBoss_func_558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, s32 arg8) {
+static s16 KamerianBoss_func_558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, s32 arg8) {
     f32 sp6C;
     f32 temp_fa0;
     f32 temp_fs3;
@@ -230,8 +226,8 @@ s16 KamerianBoss_func_558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     var_s2 = 0;
     temp_fv0 = arg0 - arg3;
     temp_fv1 = arg2 - arg5;
-    temp_fs5 = arg4 - arg1;
     temp_fv0 = sqrtf(SQ(temp_fv0) + SQ(temp_fv1));
+    temp_fs5 = arg4 - arg1;
     sp6C = ((temp_fs5 * arg7) + (arg6 * arg6));
     temp_fv1 = SQ(sp6C);
     temp_fa0 = SQ(arg7) * (SQ(temp_fv0) + SQ(temp_fs5));
@@ -267,16 +263,9 @@ s16 KamerianBoss_func_558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
             return 0x2000;
     }
 }
-#endif
 
 // offset: 0x7C0 | func: 6
-#ifndef NON_MATCHING
-void KamerianBoss_do_flame_attack(Object *self, KamerianBoss_Data *objdata);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/707_KamerianBoss/KamerianBoss_do_flame_attack.s")
-#else
-// needs KamerianBoss_func_558 to be static
-
-void KamerianBoss_do_flame_attack(Object *self, KamerianBoss_Data *objdata) {
+static void KamerianBoss_do_flame_attack(Object *self, KamerianBoss_Data *objdata) {
     f32 headX;
     f32 headY;
     f32 headZ;
@@ -312,16 +301,9 @@ void KamerianBoss_do_flame_attack(Object *self, KamerianBoss_Data *objdata) {
         }
     }
 }
-#endif
 
 // offset: 0xA0C | func: 7
-#ifndef NON_MATCHING
-void KamerianBoss_do_acid_attack(Object *arg0, KamerianBoss_Data *arg1, s32 arg2, u16 *arg3);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/707_KamerianBoss/KamerianBoss_do_acid_attack.s")
-#else
-// needs KamerianBoss_func_558 to be static
-
-void KamerianBoss_do_acid_attack(Object *self, KamerianBoss_Data *objdata, s32 side, u16 *timer) {
+static void KamerianBoss_do_acid_attack(Object *self, KamerianBoss_Data *objdata, s32 side, u16 *timer) {
     Object *player;
     f32 sp80;
     f32 sp7C;
@@ -378,10 +360,9 @@ void KamerianBoss_do_acid_attack(Object *self, KamerianBoss_Data *objdata, s32 s
     temp2 = KamerianBoss_func_558(sp78, sp74, sp70, sp6C, sp68, sp64, 8.5f, -0.22f, 1);
     KamerianBoss_create_projectile(self, sp78, sp74, sp70, sp52, temp2, 8.5f, OBJ_KamerianAcid);
 }
-#endif
 
 // offset: 0xCBC | func: 8
-void KamerianBoss_do_pipe_texture_anim(Object *self, s32 updateRate) {
+static void KamerianBoss_do_pipe_texture_anim(Object *self, s32 updateRate) {
     KamerianBoss_Data* objdata;
     TextureAnimator* texAnimator;
     f32 temp_fv0;
@@ -424,7 +405,7 @@ void KamerianBoss_do_pipe_texture_anim(Object *self, s32 updateRate) {
 }
 
 // offset: 0xE94 | func: 9
-void KamerianBoss_func_E94(Object *self, s32 arg1) {
+static void KamerianBoss_func_E94(Object *self, s32 arg1) {
     KamerianBoss_Data* objdata;
     Object* temp_t0;
     s32 sp44;
@@ -462,14 +443,6 @@ void KamerianBoss_func_E94(Object *self, s32 arg1) {
 }
 
 // offset: 0xFC4 | func: 10 | export: 1
-#ifndef NON_MATCHING
-/*0x10*/ static u16 _data_10[] = {0x0002, 0x0000, 0x0000};
-/*0x18*/ static u16 _data_18[] = {0x0018, 0x0014, 0x0008};
-void KamerianBoss_control(Object *self);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/707_KamerianBoss/KamerianBoss_control.s")
-#else
-// matches, needs called funcs to be static
-
 void KamerianBoss_control(Object *self) {
     ObjectHitInfo *temp_t6_3;
     s32 var_s0;
@@ -534,13 +507,13 @@ void KamerianBoss_control(Object *self) {
             if (objdata->rightPipeYOffset < 15000) {
                 objdata->rightPipeYOffset += gUpdateRate * 50;
             }
-            objExpr_func_80034804(self, 4)[7] = objdata->rightPipeYOffset;
+            objExpr_func_80034804(self, 4)->translateY = objdata->rightPipeYOffset;
         }
         if (objdata->leftPipeYOffset != 0) {
             if (objdata->leftPipeYOffset < 15000) {
                 objdata->leftPipeYOffset += gUpdateRate * 50;
             }
-            objExpr_func_80034804(self, 3)[7] = objdata->leftPipeYOffset;
+            objExpr_func_80034804(self, 3)->translateY = objdata->leftPipeYOffset;
         }
         // Useless assignment of v1? required to match
         var_v1 = 0;
@@ -555,12 +528,12 @@ void KamerianBoss_control(Object *self) {
         }
         if ((objdata->animFinished != 0) && (objdata->animTickDelta != 0.0f)) {
             switch (self->curModAnimId) {
-            case KD_MODANIM_DETATCH_RIGHT_PIPE:
-            case KD_MODANIM_DETATCH_RIGHT_PIPE_ALT:
+            case KD_MODANIM_DETACH_RIGHT_PIPE:
+            case KD_MODANIM_DETACH_RIGHT_PIPE_ALT:
                 KamerianBoss_enable_hit_sphere(0);
                 break;
-            case KD_MODANIM_DETATCH_LEFT_PIPE:
-            case KD_MODANIM_DETATCH_LEFT_PIPE_ALT:
+            case KD_MODANIM_DETACH_LEFT_PIPE:
+            case KD_MODANIM_DETACH_LEFT_PIPE_ALT:
                 KamerianBoss_enable_hit_sphere(1);
                 break;
             case KD_MODANIM_OPEN_RIGHT_WING:
@@ -628,7 +601,7 @@ void KamerianBoss_control(Object *self) {
                         KamerianBoss_disable_hit_sphere(13);
                         KamerianBoss_disable_hit_sphere(14);
                         objAnimSet(self, 
-                            objdata->leftWingOpened ? KD_MODANIM_DETATCH_RIGHT_PIPE_ALT : KD_MODANIM_DETATCH_RIGHT_PIPE, 
+                            objdata->leftWingOpened ? KD_MODANIM_DETACH_RIGHT_PIPE_ALT : KD_MODANIM_DETACH_RIGHT_PIPE, 
                             0.0f, 0);
                         objdata->animTickDelta = 0.005f;
                         objdata->rightPipeYOffset = 1;
@@ -649,7 +622,7 @@ void KamerianBoss_control(Object *self) {
                         KamerianBoss_disable_hit_sphere(8);
                         KamerianBoss_disable_hit_sphere(9);
                         objAnimSet(self, 
-                            objdata->rightWingOpened ? KD_MODANIM_DETATCH_LEFT_PIPE_ALT : KD_MODANIM_DETATCH_LEFT_PIPE, 
+                            objdata->rightWingOpened ? KD_MODANIM_DETACH_LEFT_PIPE_ALT : KD_MODANIM_DETACH_LEFT_PIPE, 
                             0.0f, 0);
                         objdata->animTickDelta = 0.005f;
                         objdata->leftPipeYOffset = 1;
@@ -720,7 +693,6 @@ void KamerianBoss_control(Object *self) {
         }
     }
 }
-#endif
 
 // offset: 0x1E14 | func: 11 | export: 2
 void KamerianBoss_update(Object *self) { }

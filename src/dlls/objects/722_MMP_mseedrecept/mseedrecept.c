@@ -18,6 +18,15 @@
 #include "types.h"
 
 typedef struct {
+    ObjSetup base;
+    s16 unk18;
+    u16 kyteFlightGroup;
+    s16 unk1C;
+    s8 unk1E;
+    u8 yaw;
+} MoonSeedReceptacle_Setup;
+
+typedef struct {
     u8 state;
     u8 flags;
     CurveSetup* curveSetup;
@@ -26,15 +35,6 @@ typedef struct {
     s16 glowPhase;      //Angle used for sinusoidal glowing at night
     f32 rattleTimer;    //Used for shaking sounds/effects when planted and not yet grown
 } MoonSeedReceptacle_Data;
-
-typedef struct {
-    ObjSetup base;
-    s16 unk18;
-    u16 kyteFlightGroup;
-    s16 unk1C;
-    s8 unk1E;
-    u8 yaw;
-} MoonSeedReceptacle_Setup;
 
 typedef enum {
     MoonSeedReceptacle_STATE_0_Init,
@@ -45,12 +45,10 @@ typedef enum {
 } MoonSeedReceptacle_States;
 
 typedef enum {
-    MoonSeedReceptacle_FLAG_0_None = 0,
     MoonSeedReceptacle_FLAG_1_Sequence_Played = 1,
     MoonSeedReceptacle_FLAG_2_Glowing = 2,
     MoonSeedReceptacle_FLAG_4_Rattling = 4
 } MoonSeedReceptacle_Flags;
-
 
 typedef enum {
     MMP_MoonSeedReceptacle_ID_1 = 0x41A5B, //Between the SharpClaw outpost and CloudRunner Fortress, leading further into MMP.
@@ -61,8 +59,8 @@ typedef enum {
 
 /*0x0*/ static u8 sPartFXParams[0x10];
 
-static void MoonSeedReceptacle_func_D40(Object* self);
-static int MoonSeedReceptacle_anim_callback(Object* self, Object *animObj, AnimObj_Data* animObjData, s8 arg3);
+static void MoonSeedReceptacle_grow(Object* self);
+static int MoonSeedReceptacle_animCallback(Object* self, Object *animObj, AnimObj_Data* animObjData, s8 arg3);
 
 // offset: 0x0 | ctor
 void MoonSeedReceptacle_ctor(void *dll) { }
@@ -75,7 +73,7 @@ void MoonSeedReceptacle_obj_Setup(Object* self, MoonSeedReceptacle_Setup* setup,
     MoonSeedReceptacle_Data* objData;
 
     objData = self->data;
-    self->animCallback = MoonSeedReceptacle_anim_callback;
+    self->animCallback = MoonSeedReceptacle_animCallback;
     self->srt.yaw = setup->yaw << 8;
     objData->state = MoonSeedReceptacle_STATE_0_Init;
     
@@ -106,7 +104,7 @@ void MoonSeedReceptacle_obj_Setup(Object* self, MoonSeedReceptacle_Setup* setup,
             STUBBED_PRINTF("Error romdef ident no known!\n");
     }
 
-    objData->flags = MoonSeedReceptacle_FLAG_0_None;
+    objData->flags = 0;
 }
 
 // offset: 0x118 | func: 1 | export: 1
@@ -153,7 +151,7 @@ void MoonSeedReceptacle_obj_Control(Object* self) {
 
             //Restore state if a seed was grown previously
             if (mainGetBits(objData->gamebitGrown)){
-                MoonSeedReceptacle_func_D40(self);
+                MoonSeedReceptacle_grow(self);
             }
             return;
         
@@ -294,7 +292,7 @@ u32 MoonSeedReceptacle_obj_GetDataSize(Object *self, u32 a1) {
 }
 
 // offset: 0xBEC | func: 7 | export: 7
-s32 MoonSeedReceptacle_KyteTarget_Interact(Object* self, s32 arg1) {
+s32 MoonSeedReceptacle_Func_BEC(Object* self, s32 arg1) {
     MoonSeedReceptacle_Data* objData  = self->data;
     s32 returnVal = FALSE;
 
@@ -309,7 +307,7 @@ s32 MoonSeedReceptacle_KyteTarget_Interact(Object* self, s32 arg1) {
             returnVal = TRUE;
             if (mainGetBits(objData->gamebitPlanted) && 
                 !mainGetBits(objData->gamebitGrown)) {
-                MoonSeedReceptacle_func_D40(self);
+                MoonSeedReceptacle_grow(self);
             }
         } else {
             dll_amSfx->Play(self, SOUND_912_Object_Refused, MAX_VOLUME, NULL, NULL, 0, NULL);
@@ -320,22 +318,22 @@ s32 MoonSeedReceptacle_KyteTarget_Interact(Object* self, s32 arg1) {
 }
 
 // offset: 0xD00 | func: 8 | export: 8
-s32 MoonSeedReceptacle_KyteTarget_Func_D00(Object *self, s32 a1, s32 a2) {
+u32 MoonSeedReceptacle_Func_D00(Object *self, u32 a1, u32 a2) {
     return 0;
 }
 
 // offset: 0xD18 | func: 9 | export: 9
-s32 MoonSeedReceptacle_KyteTarget_Approach(Object *self, s32 a1, s32 a2) {
+u32 MoonSeedReceptacle_Func_D18(Object *self, u32 a1, u32 a2) {
     return 0;
 }
 
 // offset: 0xD30 | func: 10 | export: 10
-s32 MoonSeedReceptacle_KyteTarget_Func_D30(Object *self){
-    return KYTE_TARGET_FUNC10_FLAG_2;
+u32 MoonSeedReceptacle_Func_D30(Object *self){
+    return 2;
 }
 
 // offset: 0xD40 | func: 11
-static void MoonSeedReceptacle_func_D40(Object* self) {
+void MoonSeedReceptacle_grow(Object* self) {
     MoonSeedReceptacle_Data* objData;
     MoonSeedReceptacle_Setup* objSetup;
     CurveSetup* curveSetup;
@@ -361,7 +359,7 @@ static void MoonSeedReceptacle_func_D40(Object* self) {
 }
 
 // offset: 0xE5C | func: 12
-static int MoonSeedReceptacle_anim_callback(Object* self, Object *animObj, AnimObj_Data* animData, s8 prevCallbackValue) {
+static int MoonSeedReceptacle_animCallback(Object* self, Object *animObj, AnimObj_Data* animData, s8 prevCallbackValue) {
     MoonSeedReceptacle_Data* objData = self->data;
 
     objData->flags |= MoonSeedReceptacle_FLAG_1_Sequence_Played;
