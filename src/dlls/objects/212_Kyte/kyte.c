@@ -176,6 +176,7 @@ static f32 Kyte_func_20A4(Object* self, Kyte_Unk3* arg1, Kyte_Unk4* arg2, s32 ar
 static void Kyte_func_A94(Object* self,  Object *override, AnimObj_Data* arg2);
 static void Kyte_func_300C(Object* self);
 static void Kyte_func_3D30(Object* self, DLL212_Data* objdata);
+static s32 Kyte_func_8E8(Object *self, Object *animObj, AnimObj_Data *animObjData, s8 arg3);
 
 // exported func, requires proto
 void Kyte_func_B94(Object* self, s32 commandIndex);
@@ -187,8 +188,24 @@ void Kyte_ctor(void* dll) { }
 void Kyte_dtor(void* dll) { }
 
 // offset: 0x18 | func: 0 | export: 0
-void Kyte_obj_Setup(Object* self, ObjSetup* setup, s32 reset);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_obj_Setup.s")
+void Kyte_obj_Setup(Object* self, ObjSetup* setup, s32 reset) {
+    DLL212_Data* temp_s0;
+
+    temp_s0 = self->data;
+    self->animCallback = (AnimationCallback ) Kyte_func_8E8;
+    objAddObjectType(self, 1);
+    routeInit(&temp_s0->unk240);
+    temp_s0->unk0 = gDLL_29_Gplay->vtbl->get_sidekick_stats();
+    temp_s0->unk22D = 1;
+    ((u8*)temp_s0)[4] = 0;
+    if (self->shadow != NULL) {
+        self->shadow->flags |= 0xA30;
+        self->shadow->flags |= 0x8000;
+    }
+    ((SidekickStats*)temp_s0->unk0)->blueFood = 36;
+    ((SidekickStats*)temp_s0->unk0)->redFood = 10;
+    mainSetBits(0x3CB, 1U);
+}
 
 // offset: 0x120 | func: 1 | export: 1
 void Kyte_obj_Control(Object* self);
@@ -247,7 +264,7 @@ u32 Kyte_obj_GetDataSize(Object* self, u32 offsetAddr) {
 }
 
 // offset: 0x8E8 | func: 7
-s32 Kyte_func_8E8(Object* self, u32 arg1, AnimObj_Data* arg2, u32 arg3) {
+static s32 Kyte_func_8E8(Object *self, Object *animObj, AnimObj_Data *animObjData, s8 arg3) {
     static s32 data_168 = -1;
     DLL212_Data* objData;
     SeqJoint* temp_v0;
@@ -256,19 +273,19 @@ s32 Kyte_func_8E8(Object* self, u32 arg1, AnimObj_Data* arg2, u32 arg3) {
     objData = self->data;
     ((u8*)objData)[4] = 0;
     func_800267A4(self);
-    if (arg2->unk62 == 4) {
+    if (animObjData->unk62 == 4) {
         temp_v0 = objExpr_func_80034804(self, 0);
-        arg2->unk120 = temp_v0->yaw;
-        arg2->unk122 = temp_v0->pitch;
-        arg2->unk62 = 0;
+        animObjData->unk120 = temp_v0->yaw;
+        animObjData->unk122 = temp_v0->pitch;
+        animObjData->unk62 = 0;
     }
     if ((self->seqSlot != -1) && (objData->unk1C8 & 0x3000)) {
-        arg2->unkF4 = (AnimObj_DataF4Callback) Kyte_func_A94;
-        arg2->unk7A &= ~4;
+        animObjData->unkF4 = (AnimObj_DataF4Callback) Kyte_func_A94;
+        animObjData->unk7A &= ~4;
         Kyte_func_20A4(self, &objData->unk118, (u8*)objData + 8, objData->unk118.unk8, (s32) ((u8*)objData)[5]);
     }
-    for (i = 0; i < arg2->messageCount; i++) {
-        switch (arg2->messages[i]) {
+    for (i = 0; i < animObjData->messageCount; i++) {
+        switch (animObjData->messages[i]) {
         case 1:
             data_168 = 2;
             break;
@@ -285,7 +302,7 @@ s32 Kyte_func_8E8(Object* self, u32 arg1, AnimObj_Data* arg2, u32 arg3) {
 }
 
 // offset: 0xA94 | func: 8
-static void Kyte_func_A94(Object* self,  Object *override, AnimObj_Data* arg2) {
+static void Kyte_func_A94(Object* self,  Object *override, AnimObj_Data* animObjData) {
     DLL212_Data* objData = self->data;
 
     objData->unk118.unk2C = 0;
