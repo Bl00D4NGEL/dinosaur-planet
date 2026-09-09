@@ -75,10 +75,14 @@ typedef struct {
     s16 unk112;
     CurveSetup* unk114;
     Kyte_Unk3 unk118;
-    u8 pad146[0x190 - 0x148];
+    u8 pad118[0x190 - 0x148];
     u8 unk190;
     u8 unk191;
-    u8 pad192[0x1C4 - 0x192];
+    u8 pad192;
+    u8 pad193;
+    u8 unk194[0x1AC - 0x194];
+    s16 unk1AC[6];
+    Vec3f unk1B8;
     s32 unk1C4;
     s32 unk1C8;
     u32 pad1CC;
@@ -133,9 +137,9 @@ typedef void (*Bss0_Callback)(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* ar
     0x3f800000, 0x3f800000, 0x00000000, 0x00000009, 0x00000008, 0x00000004, 0x00000002, 0xffffffff
 };
 /*0x94*/ static Kyte_Unk2 data_94[] = {
-    { 1.5f, 2.5f, 20.0f, 0.15f, &data_0, 2 },
-    { 0.43f, 1.2f, 2.0f, 0.2f, &data_28, 3 },
-    { 0.1f, 0.4f, 0.47f, 0.2f, &data_54, 3 },
+    { 1.5f, 2.5f, 20.0f, 0.15f, data_0, 2 },
+    { 0.43f, 1.2f, 2.0f, 0.2f, data_28, 3 },
+    { 0.1f, 0.4f, 0.47f, 0.2f, data_54, 3 },
 };
 // unused? Maybe part of data_E8
 /*0xD4*/ static u32 data_DC[] = {
@@ -150,9 +154,6 @@ typedef void (*Bss0_Callback)(Object* self, Vec3f* arg1, f32 arg2, Kyte_Unk2* ar
 /*0x148*/ static s16 data_148[] = { -1, -1, 0x08bb, -1, -1, -1 };
 /*0x154*/ static u32 data_154[] = {
     0x00000000, 0x00000002
-};
-/*0x15C*/ static u32 data_15C[] = {
-    0x00000000, 0x00000000, 0x3f800000
 };
 
 /*0x0*/ static Bss0_Callback bss_0[4];
@@ -174,6 +175,7 @@ static int Kyte_func_40BC(u8 arg0);
 static f32 Kyte_func_20A4(Object* self, Kyte_Unk3* arg1, Kyte_Unk4* arg2, s32 arg3, s32 arg4);
 static void Kyte_func_A94(Object* self,  Object *override, AnimObj_Data* arg2);
 static void Kyte_func_300C(Object* self);
+static void Kyte_func_3D30(Object* self, DLL212_Data* objdata);
 
 // exported func, requires proto
 void Kyte_func_B94(Object* self, s32 commandIndex);
@@ -196,12 +198,43 @@ void Kyte_obj_Control(Object* self);
 void Kyte_obj_Update(Object* self) { }
 
 // offset: 0x6C4 | func: 3 | export: 3
-void Kyte_obj_Print(Object* self, Gfx** gdl, Mtx** mtxs, Vertex** vtxs, Triangle** pols, s8 visibility);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_obj_Print.s")
+void Kyte_obj_Print(Object* self, Gfx** gdl, Mtx** mtxs, Vertex** vtxs, Triangle** pols, s8 visibility) {
+    DLL212_Data* objData = self->data;
+    void* var_s1;
+    s32 pad;
+    Vec3f sp38 = {0.0f, 0.0f, 1.0f};
+
+    var_s1 = objData->unk1AC;
+    objData->unk118.unk2E = visibility;
+    if (visibility == 0) {
+        return;
+    }
+
+    objprintDrawModel(self, gdl, mtxs, vtxs, pols, 1.0f);
+    objGetAttachPointWorldSpace(self, 5, &objData->unk1B8.x, &objData->unk1B8.y, &objData->unk1B8.z, 0);
+    ((s16*)var_s1)[1] = 0;
+    ((s16*)var_s1)[2] = 0;
+    ((s16*)var_s1)[0] = 0;
+    if (objData->unk1C8 & 0x10) {
+        objGetAttachPointWorldSpace(self, 5, &sp38.x, &sp38.y, &sp38.z, 1);
+        sp38.f[0] -= ((f32*)var_s1)[0];
+        sp38.f[1] -= ((f32*)var_s1)[1];
+        sp38.f[2] -= ((f32*)var_s1)[2];
+        ((s16*)var_s1)[0] = mathAtan2f(sp38.x, sp38.z);
+        ((s16*)var_s1)[1] = mathAtan2f(sqrtf(SQ(sp38.x) + SQ(sp38.z)), sp38.y);
+    }
+    Kyte_func_3D30(self, &objData->unk194);
+}
+
 
 // offset: 0x868 | func: 4 | export: 4
-void Kyte_obj_Free(Object* self, s32 onlySelf);
-#pragma GLOBAL_ASM("asm/nonmatchings/dlls/objects/212_Kyte/Kyte_obj_Free.s")
+void Kyte_obj_Free(Object* self, s32 onlySelf) {
+    DLL212_Data* objData;
+
+    objData = self->data;
+    objFreeObjectType(self, 1);
+    routeFree(&objData->unk240);
+}
 
 // offset: 0x8C4 | func: 5 | export: 5
 u32 Kyte_obj_GetModelFlags(Object* self) {
@@ -1475,7 +1508,7 @@ CurveSetup* Kyte_func_3C4C(Object* self) {
 }
 
 // offset: 0x3D30 | func: 48
-void Kyte_func_3D30(Object* self, DLL212_Data* objdata) {
+static void Kyte_func_3D30(Object* self, DLL212_Data* objdata) {
     SRT sp48;
     u8 var_s0;
 
